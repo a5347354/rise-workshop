@@ -4,16 +4,23 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
+func init() {
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+}
+
 func main() {
-	wsUrl := "wss://relay.nekolicio.us/"
-	pb := "privatekey"
-	pub := "publickey"
-	relay, err := nostr.RelayConnect(context.Background(), wsUrl)
+	relayURL := viper.GetString("relay.url")
+	pb := viper.GetString("public.key")
+	pub := viper.GetString("private.key")
+	relay, err := nostr.RelayConnect(context.Background(), relayURL)
 	defer relay.Close()
 	if err != nil {
 		panic(err)
