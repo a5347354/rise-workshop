@@ -26,7 +26,7 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     env:
-      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      PROJECT_ID: ${{ secrets.RISE_GCP_PROJECT_ID }}
       REGISTRY: us-central1
       REPOSITORY: us
       IMAGE: main
