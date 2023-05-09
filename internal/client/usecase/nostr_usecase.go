@@ -2,37 +2,36 @@ package usecase
 
 import (
 	"github.com/a5347354/rise-workshop/internal/client"
-	"github.com/nbd-wtf/go-nostr"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-
-	"fmt"
-	"log"
+	"github.com/a5347354/rise-workshop/pkg"
 
 	"context"
+
+	"github.com/nbd-wtf/go-nostr"
+	"github.com/sirupsen/logrus"
 )
 
 type clientUsecase struct {
+	client pkg.NostrClient
 }
 
 func NewClient() client.Usecase {
-	return &clientUsecase{}
+	return &clientUsecase{
+		client: pkg.NewNostrClient(),
+	}
 }
 
 func (c clientUsecase) SendMessage(ctx context.Context) error {
-	relayURL := viper.GetString("relay.url")
-	pb := viper.GetString("public.key")
-	pub := viper.GetString("private.key")
-	relay, err := nostr.RelayConnect(context.Background(), relayURL)
-	defer relay.Close()
+	err := c.client.Connect(ctx)
 	if err != nil {
-		panic(err)
+		logrus.Panic(err)
+	}
+	defer c.client.Disconnect(ctx)
+	if err != nil {
+		logrus.Panic(err)
 	}
 
 	e := nostr.Event{
-		PubKey:    pub,
-		CreatedAt: nostr.Now(),
-		Kind:      31337,
+		Kind: 31337,
 		Tags: nostr.Tags{
 			nostr.Tag{
 				"d",
@@ -72,21 +71,6 @@ func (c clientUsecase) SendMessage(ctx context.Context) error {
 		},
 		Content: "Nostrovia | The Pablo Episode\n\nhttps://s3-us-west-2.amazona",
 	}
-	e.ID = e.GetID()
-	e.Sign(pb)
-	_, err = e.CheckSignature()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(e.ID)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	status, err := relay.Publish(ctx, e)
-	if err != nil {
-		logrus.Panic(err)
-	}
-	if status != nostr.PublishStatusSucceeded {
-		return fmt.Errorf("relay no response")
-	}
-	return nil
+	_, err = c.client.Publish(ctx, e)
+	return err
 }
