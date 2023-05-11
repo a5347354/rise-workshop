@@ -31,6 +31,10 @@ jobs:
       REPOSITORY: us
       IMAGE: main
       DOCKER_FILE_PATH: build/dockerfile/Dockerfile
+    strategy:
+      matrix:
+        include:
+          - component: "client"
 
     steps:
       - name: Checkout
@@ -67,6 +71,8 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha
+          build-args: |
+            "BUILD_DIR=cmd/${{ matrix.component }}"
 
       - name: Deploy Docker image
         run: |-
