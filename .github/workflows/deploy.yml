@@ -73,6 +73,7 @@ jobs:
           cache-to: type=gha
           build-args: |
             "BUILD_DIR=cmd/${{ matrix.component }}"
+            "SERVICE_ID=${{ matrix.component }}"
 
       - name: Deploy Docker image
         run: |-

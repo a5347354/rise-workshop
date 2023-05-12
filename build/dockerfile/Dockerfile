@@ -1,5 +1,7 @@
 FROM golang:1.20-buster AS build
 ARG BUILD_DIR
+ARG SERVICE_ID
+ENV SERVICE_ID ${SERVICE_ID}
 COPY . /src
 WORKDIR /src
 RUN go mod tidy

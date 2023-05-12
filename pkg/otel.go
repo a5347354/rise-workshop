@@ -22,7 +22,7 @@ func NewTracerProvider() trace.TracerProvider {
 		tracesdk.WithBatcher(exp),
 		tracesdk.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceNameKey.String("rise-workshop"),
+			semconv.ServiceNameKey.String(viper.GetString("service.id")),
 			attribute.String("environment", func() string {
 				if viper.GetBool("debug") {
 					return "test"

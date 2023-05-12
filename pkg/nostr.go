@@ -3,7 +3,7 @@ package pkg
 import (
 	"context"
 	"fmt"
-	
+
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/spf13/viper"
 )
