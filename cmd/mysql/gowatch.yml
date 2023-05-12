@@ -1,0 +1,2 @@
+prev_build_cmds:
+- go mod tidy
