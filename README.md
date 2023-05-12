@@ -1,5 +1,10 @@
 # Distributed Systems Project 
 
+## How to build this Project
+```
+go install github.com/golang/mock/mockgen@v1.6.0
+```
+
 ## Phase 1
 Building a simple nostr client
 

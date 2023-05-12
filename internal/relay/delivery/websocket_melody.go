@@ -52,7 +52,7 @@ func RegistWebsocketHandler(engine *gin.Engine, m *melody.Melody, usecase relay.
 			),
 		},
 	}
-	engine.GET("/wss", func(c *gin.Context) {
+	engine.GET("/ws", func(c *gin.Context) {
 		m.HandleRequest(c.Writer, c.Request)
 	})
 

@@ -45,9 +45,12 @@ func (c *nostrClient) Connect(ctx context.Context) error {
 func (c *nostrClient) Publish(ctx context.Context, e nostr.Event) (nostr.Status, error) {
 	e.ID = e.GetID()
 	e.Sign(c.privateKey)
-	_, err := e.CheckSignature()
+	ok, err := e.CheckSignature()
 	if err != nil {
 		return nostr.PublishStatusFailed, err
+	}
+	if !ok {
+		return nostr.PublishStatusFailed, fmt.Errorf("singature is wrong")
 	}
 	fmt.Println(e.ID)
 	e.PubKey = c.publicKey
