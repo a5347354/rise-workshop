@@ -3,6 +3,7 @@ package usecase
 import (
 	"github.com/a5347354/rise-workshop/internal/event"
 	"github.com/a5347354/rise-workshop/internal/relay"
+	"github.com/a5347354/rise-workshop/pkg"
 
 	"context"
 	"encoding/json"
@@ -20,20 +21,20 @@ func NewRelay() relay.Usecase {
 	return &relayUsecase{}
 }
 
-func (c relayUsecase) ReceiveMessage(ctx context.Context, msg []byte) error {
+func (c relayUsecase) ReceiveMessage(ctx context.Context, msg []byte) (pkg.WebSocketMsg, error) {
 	var message []json.RawMessage
 	if err := json.Unmarshal(msg, &message); err != nil {
-		return fmt.Errorf("failed to parse message: %w", err)
+		return pkg.WebSocketMsg{}, nil
 	}
 
 	if len(message) < 2 {
-		return fmt.Errorf("invalid message format")
+		return pkg.WebSocketMsg{}, nil
 	}
 
 	var messageType string
 
 	if err := json.Unmarshal(message[0], &messageType); err != nil {
-		return fmt.Errorf("failed to extract message type: %w", err)
+		return pkg.WebSocketMsg{}, nil
 	}
 
 	// Handle different message types
@@ -45,15 +46,15 @@ func (c relayUsecase) ReceiveMessage(ctx context.Context, msg []byte) error {
 	case "CLOSE":
 		return c.handleCloseMessage(ctx, message[1])
 	default:
-		return fmt.Errorf("unknown message type: %s", messageType)
+		return pkg.WebSocketMsg{}, fmt.Errorf("unknown message type: %s", messageType)
 	}
 }
 
-func (c relayUsecase) handleEventMessage(ctx context.Context, eventJSON json.RawMessage) error {
+func (c relayUsecase) handleEventMessage(ctx context.Context, eventJSON json.RawMessage) (pkg.WebSocketMsg, error) {
 	// TODO: Verify the event ID and signature
 	var evt nostr.Event
 	if err := json.Unmarshal(eventJSON, &evt); err != nil {
-		return fmt.Errorf("failed to decode event: %v" + err.Error())
+		return pkg.WebSocketMsg{}, nil
 	}
 	//serialized := evt.Serialize()
 	//hash := sha256.Sum256(serialized)
@@ -73,17 +74,17 @@ func (c relayUsecase) handleEventMessage(ctx context.Context, eventJSON json.Raw
 	// Log the event
 	logrus.Infof("Received event: %s", string(eventJSON))
 
-	return nil
+	return pkg.WebSocketMsg{}, nil
 }
 
-func (c relayUsecase) handleRequestMessage(ctx context.Context, requestData []json.RawMessage) error {
+func (c relayUsecase) handleRequestMessage(ctx context.Context, requestData []json.RawMessage) (pkg.WebSocketMsg, error) {
 	// TODO: Process the request and send appropriate events to the client(s)
 
-	return nil
+	return pkg.WebSocketMsg{}, nil
 }
 
-func (c relayUsecase) handleCloseMessage(ctx context.Context, subscriptionID json.RawMessage) error {
+func (c relayUsecase) handleCloseMessage(ctx context.Context, subscriptionID json.RawMessage) (pkg.WebSocketMsg, error) {
 	// TODO: Close the subscription with the given ID
 
-	return nil
+	return pkg.WebSocketMsg{}, nil
 }

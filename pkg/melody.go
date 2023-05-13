@@ -7,3 +7,15 @@ func NewWebsocket() *melody.Melody {
 	m.Config.MaxMessageSize = 2097152
 	return m
 }
+
+type WebSocketMsgType string
+
+const (
+	WebSocketMsgTypeBroadcast WebSocketMsgType = "Broadcast"
+	WebSocketMsgTypeNormal    WebSocketMsgType = "Normal"
+)
+
+type WebSocketMsg struct {
+	Action WebSocketMsgType
+	Msg    []byte
+}

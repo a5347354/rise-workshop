@@ -1,16 +1,17 @@
 package delivery
 
 import (
-	"context"
 	"github.com/a5347354/rise-workshop/internal/relay"
-	"github.com/sirupsen/logrus"
+	"github.com/a5347354/rise-workshop/pkg"
 
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/olahol/melody.v1"
 )
 
@@ -59,7 +60,7 @@ func RegistWebsocketHandler(engine *gin.Engine, m *melody.Melody, usecase relay.
 	m.HandleConnect(r.handleConnect())
 	m.HandleDisconnect(r.handleDisconnect())
 	m.HandleError(r.handleError())
-	m.HandleMessage(r.message())
+	m.HandleMessage(r.message(m))
 }
 
 func (r relayHandler) handleConnect() func(s *melody.Session) {
@@ -80,12 +81,18 @@ func (r relayHandler) handleError() func(s *melody.Session, err error) {
 	}
 }
 
-func (r relayHandler) message() func(s *melody.Session, msg []byte) {
+func (r relayHandler) message(m *melody.Melody) func(s *melody.Session, msg []byte) {
 	return func(s *melody.Session, msg []byte) {
 		t := time.Now()
-		err := r.usecase.ReceiveMessage(context.Background(), msg)
+		resp, err := r.usecase.ReceiveMessage(context.Background(), msg)
 		if err != nil {
 			logrus.Panic(err)
+		}
+		switch resp.Action {
+		case pkg.WebSocketMsgTypeNormal:
+			s.Write(resp.Msg)
+		case pkg.WebSocketMsgTypeBroadcast:
+			m.Broadcast(resp.Msg)
 		}
 		fmt.Printf("[Melody] %v | %13v | %s | Message %s\n",
 			t.Format("2006/01/02 - 15:04:05"),
