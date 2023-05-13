@@ -83,5 +83,5 @@ jobs:
       - name: Deploy Docker image
         run: |-
           gcloud config set run/region $REGISTRY \
-            && gcloud run deploy "${{ matrix.component }}_${{ env.PROJECT_ID }}" --image "$REGISTRY-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:${{ github.sha }}" --region $REGISTRY --platform managed
+            && gcloud run deploy "${{ matrix.component }}-${{ env.PROJECT_ID }}" --image "$REGISTRY-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:${{ github.sha }}" --region $REGISTRY --platform managed
     
