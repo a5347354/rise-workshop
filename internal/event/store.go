@@ -1,9 +1,11 @@
 package event
 
-import "context"
+import (
+	"github.com/a5347354/rise-workshop/internal"
+
+	"context"
+)
 
 type Store interface {
-	List(ctx context.Context) []string
-	Upsert(ctx context.Context, id string) error
-	Remove(ctx context.Context, id string) error
+	Insert(ctx context.Context, event internal.Event) (err error)
 }

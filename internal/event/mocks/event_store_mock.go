@@ -8,6 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	internal "github.com/a5347354/rise-workshop/internal"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -34,44 +35,16 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
-// List mocks base method.
-func (m *MockStore) List(ctx context.Context) []string {
+// Insert mocks base method.
+func (m *MockStore) Insert(ctx context.Context, event internal.Event) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", ctx)
-	ret0, _ := ret[0].([]string)
-	return ret0
-}
-
-// List indicates an expected call of List.
-func (mr *MockStoreMockRecorder) List(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockStore)(nil).List), ctx)
-}
-
-// Remove mocks base method.
-func (m *MockStore) Remove(ctx context.Context, id string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Remove", ctx, id)
+	ret := m.ctrl.Call(m, "Insert", ctx, event)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Remove indicates an expected call of Remove.
-func (mr *MockStoreMockRecorder) Remove(ctx, id interface{}) *gomock.Call {
+// Insert indicates an expected call of Insert.
+func (mr *MockStoreMockRecorder) Insert(ctx, event interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Remove", reflect.TypeOf((*MockStore)(nil).Remove), ctx, id)
-}
-
-// Upsert mocks base method.
-func (m *MockStore) Upsert(ctx context.Context, id string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Upsert", ctx, id)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Upsert indicates an expected call of Upsert.
-func (mr *MockStoreMockRecorder) Upsert(ctx, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upsert", reflect.TypeOf((*MockStore)(nil).Upsert), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockStore)(nil).Insert), ctx, event)
 }

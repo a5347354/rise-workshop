@@ -65,19 +65,19 @@ func RegistWebsocketHandler(engine *gin.Engine, m *melody.Melody, usecase relay.
 
 func (r relayHandler) handleConnect() func(s *melody.Session) {
 	return func(s *melody.Session) {
-		fmt.Printf("[Melody] | %s | Connect %s\n", s.Request.RemoteAddr, s.Request.RequestURI)
+		fmt.Printf("[Melody] %v | %s | Connect %s\n", time.Now().Format("2006/01/02 - 15:04:05"), s.Request.RemoteAddr, s.Request.RequestURI)
 	}
 }
 
 func (r relayHandler) handleDisconnect() func(s *melody.Session) {
 	return func(s *melody.Session) {
-		fmt.Printf("[Melody] | %s | Disconnect %s\n", s.Request.RemoteAddr, s.Request.RequestURI)
+		fmt.Printf("[Melody] %v | %s | Disconnect %s\n", time.Now().Format("2006/01/02 - 15:04:05"), s.Request.RemoteAddr, s.Request.RequestURI)
 	}
 }
 
 func (r relayHandler) handleError() func(s *melody.Session, err error) {
 	return func(s *melody.Session, err error) {
-		fmt.Printf("[Melody] | %s | Error %s %s\n", s.Request.RemoteAddr, s.Request.RequestURI, err)
+		fmt.Printf("[Melody] %v | %s | Error %s %s\n", time.Now().Format("2006/01/02 - 15:04:05"), s.Request.RemoteAddr, s.Request.RequestURI, err)
 	}
 }
 
@@ -93,6 +93,7 @@ func (r relayHandler) message(m *melody.Melody) func(s *melody.Session, msg []by
 			s.Write(resp.Msg)
 		case pkg.WebSocketMsgTypeBroadcast:
 			m.Broadcast(resp.Msg)
+			err := m.Broadcast(resp.Msg)
 		}
 		fmt.Printf("[Melody] %v | %13v | %s | Message %s\n",
 			t.Format("2006/01/02 - 15:04:05"),

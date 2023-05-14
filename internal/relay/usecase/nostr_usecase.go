@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"github.com/a5347354/rise-workshop/internal/event"
 	"github.com/a5347354/rise-workshop/internal/relay"
 	"github.com/a5347354/rise-workshop/pkg"
@@ -10,15 +12,14 @@ import (
 	"fmt"
 
 	"github.com/nbd-wtf/go-nostr"
-	"github.com/sirupsen/logrus"
 )
 
 type relayUsecase struct {
 	eStore event.Store
 }
 
-func NewRelay() relay.Usecase {
-	return &relayUsecase{}
+func NewRelay(eStore event.Store) relay.Usecase {
+	return &relayUsecase{eStore}
 }
 
 func (c relayUsecase) ReceiveMessage(ctx context.Context, msg []byte) (pkg.WebSocketMsg, error) {
@@ -51,30 +52,32 @@ func (c relayUsecase) ReceiveMessage(ctx context.Context, msg []byte) (pkg.WebSo
 }
 
 func (c relayUsecase) handleEventMessage(ctx context.Context, eventJSON json.RawMessage) (pkg.WebSocketMsg, error) {
-	// TODO: Verify the event ID and signature
+	event, msg, err := c.verify(eventJSON)
+	if err != nil {
+		return msg, err
+	}
+
+	c.eStore.Insert(ctx, pkg.NostrEventToEvent(event))
+	return pkg.WebSocketMsg{
+		Action: pkg.WebSocketMsgTypeBroadcast,
+		Msg:    eventJSON,
+	}, nil
+}
+
+func (c relayUsecase) verify(eventJSON json.RawMessage) (nostr.Event, pkg.WebSocketMsg, error) {
 	var evt nostr.Event
 	if err := json.Unmarshal(eventJSON, &evt); err != nil {
-		return pkg.WebSocketMsg{}, nil
+		return nostr.Event{}, pkg.WebSocketMsg{}, nil
 	}
-	//serialized := evt.Serialize()
-	//hash := sha256.Sum256(serialized)
-	//evt.ID = hex.EncodeToString(hash[:])
-	//if ok, err := evt.CheckSignature(); err != nil {
-	//	return fmt.Errorf("error: failed to verify signature")
-	//} else if !ok {
-	//	logrus.Warn(fmt.Sprintf("eventID:%s", evt.ID))
-	//	logrus.Warn(fmt.Sprintf("pubky:%s", evt.PubKey))
-	//	logrus.Warn(fmt.Sprintf("sig:%s", evt.Sig))
-	//
-	//	return fmt.Errorf("invalid: signature is invalid")
-	//}
-
-	// TODO: Store the event in the database
-
-	// Log the event
-	logrus.Infof("Received event: %s", string(eventJSON))
-
-	return pkg.WebSocketMsg{}, nil
+	serialized := evt.Serialize()
+	hash := sha256.Sum256(serialized)
+	evt.ID = hex.EncodeToString(hash[:])
+	if ok, err := evt.CheckSignature(); err != nil {
+		return nostr.Event{}, pkg.WebSocketMsg{}, fmt.Errorf("error: failed to verify signature")
+	} else if !ok {
+		return nostr.Event{}, pkg.WebSocketMsg{}, fmt.Errorf("invalid: signature is invalid")
+	}
+	return evt, pkg.WebSocketMsg{}, nil
 }
 
 func (c relayUsecase) handleRequestMessage(ctx context.Context, requestData []json.RawMessage) (pkg.WebSocketMsg, error) {
