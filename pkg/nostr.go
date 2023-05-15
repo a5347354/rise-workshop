@@ -24,9 +24,6 @@ type NostrClient interface {
 }
 
 func NewNostrClient() NostrClient {
-	if viper.GetBool("start") {
-
-	}
 	return &nostrClient{
 		nil,
 		viper.GetString("relay.url"),
@@ -36,7 +33,7 @@ func NewNostrClient() NostrClient {
 }
 
 func (c *nostrClient) Connect(ctx context.Context) error {
-	r, err := nostr.RelayConnect(ctx, c.relayURL)
+	r, err := nostr.RelayConnect(ctx, c.relayURL+"/ws")
 	if err != nil {
 		return err
 	}
