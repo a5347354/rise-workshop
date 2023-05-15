@@ -9,6 +9,7 @@ require (
 	github.com/nbd-wtf/go-nostr v0.17.1
 	github.com/prometheus/client_golang v1.15.1
 	github.com/sirupsen/logrus v1.9.0
+	github.com/smartystreets/goconvey v1.8.0
 	github.com/spf13/viper v1.15.0
 	github.com/wei840222/gorm-otel v1.0.1
 	go.opentelemetry.io/contrib/propagators/jaeger v1.16.1
@@ -69,7 +70,6 @@ require (
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/smartystreets/assertions v1.13.1 // indirect
-	github.com/smartystreets/goconvey v1.8.0 // indirect
 	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect

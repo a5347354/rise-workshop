@@ -1,8 +1,21 @@
 # Distributed Systems Project 
 
-## How to build this Project
+## How to run this Project on local
+### Install tools
+```bash
+# auto watch file change and hot reload server
+go get -u github.com/silenceper/gowatch
+
+# install mockgen
+go get -u github.com/golang/mock/mockgen
+
+# install govulncheck
+go install golang.org/x/vuln/cmd/govulncheck@latest
 ```
-go install github.com/golang/mock/mockgen@v1.6.0
+
+### View coverReport
+```bash
+go tool cover -html=coverage.out
 ```
 
 ## Phase 1

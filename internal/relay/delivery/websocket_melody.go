@@ -60,7 +60,7 @@ func RegistWebsocketHandler(engine *gin.Engine, m *melody.Melody, usecase relay.
 	m.HandleConnect(r.handleConnect())
 	m.HandleDisconnect(r.handleDisconnect())
 	m.HandleError(r.handleError())
-	m.HandleMessage(r.message(m))
+	m.HandleMessage(r.message())
 }
 
 func (r relayHandler) handleConnect() func(s *melody.Session) {
@@ -82,21 +82,16 @@ func (r relayHandler) handleError() func(s *melody.Session, err error) {
 	}
 }
 
-func (r relayHandler) message(m *melody.Melody) func(s *melody.Session, msg []byte) {
+func (r relayHandler) message() func(s *melody.Session, msg []byte) {
 	return func(s *melody.Session, msg []byte) {
 		t := time.Now()
-		resp, err := r.usecase.ReceiveMessage(context.Background(), msg)
+		resp, err := r.usecase.ReceiveMessage(context.Background(), msg, s)
 		if err != nil {
 			logrus.Panic(err)
 		}
 		switch resp.Action {
 		case pkg.WebSocketMsgTypeNormal:
 			s.Write(resp.Msg)
-		case pkg.WebSocketMsgTypeBroadcast:
-			logrus.Info("test")
-			logrus.Info(resp.Msg)
-			m.Broadcast(resp.Msg)
-			logrus.Warn(err)
 		}
 		fmt.Printf("[Melody] %v | %13v | %s | Message %s\n",
 			t.Format("2006/01/02 - 15:04:05"),

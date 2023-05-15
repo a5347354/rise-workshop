@@ -25,7 +25,6 @@ func (c clientUsecase) SendMessage(ctx context.Context) error {
 	if err != nil {
 		logrus.Panic(err)
 	}
-	defer c.client.Disconnect(ctx)
 	if err != nil {
 		logrus.Panic(err)
 	}
@@ -71,6 +70,11 @@ func (c clientUsecase) SendMessage(ctx context.Context) error {
 		},
 		Content: "Nostrovia | The Pablo Episode\n\nhttps://s3-us-west-2.amazona",
 	}
+	c.client.Subscribe(ctx, []nostr.Filter{{
+		Kinds:   []int{nostr.KindTextNote},
+		Authors: []string{"sss"},
+		Limit:   1,
+	}})
 	_, err = c.client.Publish(ctx, e)
 	return err
 }

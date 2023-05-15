@@ -26,7 +26,10 @@ func main() {
 			pkg.NewWebsocket,
 			pkg.NewRouter,
 
+			delivery.NewNotification,
+
 			store.NewEventStore,
+
 			usecase.NewRelay,
 		),
 		fx.Invoke(

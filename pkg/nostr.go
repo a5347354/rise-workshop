@@ -20,6 +20,7 @@ type NostrClient interface {
 	Connect(ctx context.Context) error
 	Publish(ctx context.Context, e nostr.Event) (nostr.Status, error)
 	Disconnect(ctx context.Context) error
+	Subscribe(ctx context.Context, filters nostr.Filters) (*nostr.Subscription, error)
 }
 
 func NewNostrClient() NostrClient {
@@ -56,6 +57,10 @@ func (c *nostrClient) Publish(ctx context.Context, e nostr.Event) (nostr.Status,
 		return status, fmt.Errorf("relay no response")
 	}
 	return nostr.PublishStatusFailed, err
+}
+
+func (c *nostrClient) Subscribe(ctx context.Context, filters nostr.Filters) (*nostr.Subscription, error) {
+	return c.relay.Subscribe(ctx, filters)
 }
 
 func (c *nostrClient) Disconnect(ctx context.Context) error {

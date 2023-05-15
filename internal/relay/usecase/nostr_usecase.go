@@ -6,6 +6,7 @@ import (
 	"github.com/a5347354/rise-workshop/internal/event"
 	"github.com/a5347354/rise-workshop/internal/relay"
 	"github.com/a5347354/rise-workshop/pkg"
+	"gopkg.in/olahol/melody.v1"
 
 	"context"
 	"encoding/json"
@@ -15,14 +16,15 @@ import (
 )
 
 type relayUsecase struct {
-	eStore event.Store
+	eStore       event.Store
+	notification relay.Notification
 }
 
-func NewRelay(eStore event.Store) relay.Usecase {
-	return &relayUsecase{eStore}
+func NewRelay(eStore event.Store, notification relay.Notification) relay.Usecase {
+	return &relayUsecase{eStore, notification}
 }
 
-func (c relayUsecase) ReceiveMessage(ctx context.Context, msg []byte) (pkg.WebSocketMsg, error) {
+func (c relayUsecase) ReceiveMessage(ctx context.Context, msg []byte, session *melody.Session) (pkg.WebSocketMsg, error) {
 	var message []json.RawMessage
 	if err := json.Unmarshal(msg, &message); err != nil {
 		return pkg.WebSocketMsg{}, nil
@@ -37,13 +39,12 @@ func (c relayUsecase) ReceiveMessage(ctx context.Context, msg []byte) (pkg.WebSo
 	if err := json.Unmarshal(message[0], &messageType); err != nil {
 		return pkg.WebSocketMsg{}, nil
 	}
-
 	// Handle different message types
 	switch messageType {
 	case "EVENT":
 		return c.handleEventMessage(ctx, message[1])
 	case "REQ":
-		return c.handleRequestMessage(ctx, message[1:])
+		return c.handleRequestMessage(ctx, message[1:], session)
 	case "CLOSE":
 		return c.handleCloseMessage(ctx, message[1])
 	default:
@@ -58,8 +59,9 @@ func (c relayUsecase) handleEventMessage(ctx context.Context, eventJSON json.Raw
 	}
 
 	c.eStore.Insert(ctx, pkg.NostrEventToEvent(event))
+	c.notification.Broadcast(ctx, eventJSON)
 	return pkg.WebSocketMsg{
-		Action: pkg.WebSocketMsgTypeBroadcast,
+		Action: pkg.WebSocketMsgTypeNormal,
 		Msg:    eventJSON,
 	}, nil
 }
@@ -80,14 +82,20 @@ func (c relayUsecase) verify(eventJSON json.RawMessage) (nostr.Event, pkg.WebSoc
 	return evt, pkg.WebSocketMsg{}, nil
 }
 
-func (c relayUsecase) handleRequestMessage(ctx context.Context, requestData []json.RawMessage) (pkg.WebSocketMsg, error) {
-	// TODO: Process the request and send appropriate events to the client(s)
-
+func (c relayUsecase) handleRequestMessage(ctx context.Context, requestData []json.RawMessage, s *melody.Session) (pkg.WebSocketMsg, error) {
+	var id string
+	if err := json.Unmarshal(requestData[0], &id); err != nil {
+		return pkg.WebSocketMsg{}, fmt.Errorf("error: parse id")
+	}
+	c.notification.Subscribe(ctx, id, s)
 	return pkg.WebSocketMsg{}, nil
 }
 
 func (c relayUsecase) handleCloseMessage(ctx context.Context, subscriptionID json.RawMessage) (pkg.WebSocketMsg, error) {
-	// TODO: Close the subscription with the given ID
-
+	var id string
+	if err := json.Unmarshal(subscriptionID, &id); err != nil {
+		return pkg.WebSocketMsg{}, fmt.Errorf("error: parse id")
+	}
+	c.notification.UnSubscribe(ctx, id)
 	return pkg.WebSocketMsg{}, nil
 }
