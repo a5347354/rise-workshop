@@ -33,7 +33,7 @@ func NewNostrClient() NostrClient {
 }
 
 func (c *nostrClient) Connect(ctx context.Context) error {
-	r, err := nostr.RelayConnect(ctx, c.relayURL+"/ws")
+	r, err := nostr.RelayConnect(ctx, c.relayURL)
 	if err != nil {
 		return err
 	}
