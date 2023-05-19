@@ -8,15 +8,16 @@ import (
 
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/sirupsen/logrus"
+	"go.uber.org/fx"
 )
 
 type clientUsecase struct {
 	client pkg.NostrClient
 }
 
-func NewClient() client.Usecase {
+func NewClient(lc fx.Lifecycle) client.Usecase {
 	return &clientUsecase{
-		client: pkg.NewNostrClient(),
+		client: pkg.NewNostrClient(lc),
 	}
 }
 

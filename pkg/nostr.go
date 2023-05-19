@@ -1,12 +1,15 @@
 package pkg
 
 import (
+	"github.com/a5347354/rise-workshop/internal"
+
 	"context"
 	"fmt"
-	"github.com/a5347354/rise-workshop/internal"
+	"strings"
+
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/spf13/viper"
-	"strings"
+	"go.uber.org/fx"
 )
 
 type nostrClient struct {
@@ -19,11 +22,12 @@ type nostrClient struct {
 type NostrClient interface {
 	Connect(ctx context.Context) error
 	Publish(ctx context.Context, e nostr.Event) (nostr.Status, error)
-	Disconnect(ctx context.Context) error
 	Subscribe(ctx context.Context, filters nostr.Filters) (*nostr.Subscription, error)
+	Disconnect(ctx context.Context) error
+	GetClient() *nostr.Relay
 }
 
-func NewNostrClient() NostrClient {
+func NewNostrClientWithoutLC() NostrClient {
 	return &nostrClient{
 		nil,
 		viper.GetString("relay.url"),
@@ -32,6 +36,23 @@ func NewNostrClient() NostrClient {
 	}
 }
 
+func NewNostrClient(lc fx.Lifecycle) NostrClient {
+	c := NewNostrClientWithoutLC()
+	lc.Append(fx.Hook{
+		OnStop: func(context.Context) error {
+			if c.GetClient() != nil {
+				return c.GetClient().Close()
+			}
+			return nil
+		},
+	})
+	return &nostrClient{
+		nil,
+		viper.GetString("relay.url"),
+		viper.GetString("private.key"),
+		viper.GetString("public.key"),
+	}
+}
 func (c *nostrClient) Connect(ctx context.Context) error {
 	r, err := nostr.RelayConnect(ctx, c.relayURL)
 	if err != nil {
@@ -65,6 +86,10 @@ func (c *nostrClient) Disconnect(ctx context.Context) error {
 		return c.relay.Close()
 	}
 	return nil
+}
+
+func (c *nostrClient) GetClient() *nostr.Relay {
+	return c.relay
 }
 
 func NostrEventToEvent(e nostr.Event) internal.Event {
