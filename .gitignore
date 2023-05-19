@@ -2,3 +2,5 @@
 coverage.out
 rise-workshop
 .DS_STORE
+cmd/relay/relay
+cmd/client/client
