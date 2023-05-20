@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"context"
 	"github.com/a5347354/rise-workshop/internal/aggregator"
 	"github.com/a5347354/rise-workshop/internal/client/usecase"
 	"github.com/a5347354/rise-workshop/internal/event"
