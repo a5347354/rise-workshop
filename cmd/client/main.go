@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/a5347354/rise-workshop/internal/client/delivery"
 	"github.com/a5347354/rise-workshop/internal/client/usecase"
+	"github.com/a5347354/rise-workshop/internal/event/store/postgres"
 	"github.com/a5347354/rise-workshop/pkg"
 
 	"strings"
@@ -22,7 +23,9 @@ func main() {
 	fx.New(
 		fx.Provide(
 			pkg.NewRouter,
+			pkg.NewPostgresClient,
 
+			postgres.NewEventStore,
 			usecase.NewClient,
 		),
 		fx.Invoke(

@@ -21,6 +21,7 @@ type nostrClient struct {
 
 type NostrClient interface {
 	Connect(ctx context.Context) error
+	ConnectURL(ctx context.Context, url string) error
 	Publish(ctx context.Context, e nostr.Event) (nostr.Status, error)
 	Subscribe(ctx context.Context, filters nostr.Filters) (*nostr.Subscription, error)
 	Disconnect(ctx context.Context) error
@@ -53,8 +54,18 @@ func NewNostrClient(lc fx.Lifecycle) NostrClient {
 		viper.GetString("public.key"),
 	}
 }
+
 func (c *nostrClient) Connect(ctx context.Context) error {
 	r, err := nostr.RelayConnect(ctx, c.relayURL)
+	if err != nil {
+		return err
+	}
+	c.relay = r
+	return nil
+}
+
+func (c *nostrClient) ConnectURL(ctx context.Context, url string) error {
+	r, err := nostr.RelayConnect(ctx, url)
 	if err != nil {
 		return err
 	}

@@ -1,12 +1,14 @@
 package main
 
 import (
+	"github.com/a5347354/rise-workshop/internal/aggregator"
+	"github.com/a5347354/rise-workshop/internal/aggregator/usecase"
 	"github.com/a5347354/rise-workshop/internal/event/store/postgres"
-	"github.com/a5347354/rise-workshop/internal/relay/delivery"
-	"github.com/a5347354/rise-workshop/internal/relay/usecase"
 	"github.com/a5347354/rise-workshop/pkg"
 
+	"context"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 	"go.uber.org/fx"
@@ -23,17 +25,17 @@ func main() {
 	fx.New(
 		fx.Provide(
 			pkg.NewPostgresClient,
-			pkg.NewWebsocket,
-			pkg.NewRouter,
-
-			delivery.NewNotification,
-
 			postgres.NewEventStore,
-
-			usecase.NewRelay,
+			usecase.NewAggregator,
 		),
 		fx.Invoke(
-			delivery.RegistWebsocketHandler,
+			func(usecase aggregator.Usecase) error {
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+				defer cancel()
+				usecase.Collect(ctx)
+				time.Sleep(time.Second * 360)
+				return nil
+			},
 		),
 	).Run()
 }

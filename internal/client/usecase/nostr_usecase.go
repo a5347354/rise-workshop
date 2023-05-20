@@ -2,9 +2,11 @@ package usecase
 
 import (
 	"github.com/a5347354/rise-workshop/internal/client"
+	"github.com/a5347354/rise-workshop/internal/event"
 	"github.com/a5347354/rise-workshop/pkg"
 
 	"context"
+	"time"
 
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/sirupsen/logrus"
@@ -13,12 +15,37 @@ import (
 
 type clientUsecase struct {
 	client pkg.NostrClient
+	eStore event.Store
 }
 
-func NewClient(lc fx.Lifecycle) client.Usecase {
+func NewClient(lc fx.Lifecycle, eStore event.Store) client.Usecase {
 	return &clientUsecase{
 		client: pkg.NewNostrClient(lc),
+		eStore: eStore,
 	}
+}
+
+// TODO: Don't let process down
+func (c clientUsecase) Collect(ctx context.Context, url string) error {
+	err := c.client.ConnectURL(ctx, url)
+	if err != nil {
+		logrus.Warn(err)
+		return err
+	}
+	sub, err := c.client.Subscribe(ctx, nostr.Filters{nostr.Filter{Kinds: []int{nostr.KindTextNote}}})
+	if err != nil {
+		logrus.Error(err)
+		return err
+	}
+	for ev := range sub.Events {
+		logrus.Info(*ev)
+		err := c.eStore.Insert(ctx, pkg.NostrEventToEvent(*ev))
+		if err != nil {
+			logrus.Error(err)
+			return err
+		}
+	}
+	return nil
 }
 
 func (c clientUsecase) SendMessage(ctx context.Context) error {
@@ -26,10 +53,15 @@ func (c clientUsecase) SendMessage(ctx context.Context) error {
 	if err != nil {
 		logrus.Panic(err)
 	}
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+	sub, err := c.client.Subscribe(ctx, nostr.Filters{nostr.Filter{Kinds: []int{nostr.KindTextNote}}})
 	if err != nil {
 		logrus.Panic(err)
 	}
-
+	for ev := range sub.Events {
+		logrus.WithField("time", time.Now()).Warn(ev)
+	}
 	e := nostr.Event{
 		Kind: 31337,
 		Tags: nostr.Tags{
@@ -71,11 +103,6 @@ func (c clientUsecase) SendMessage(ctx context.Context) error {
 		},
 		Content: "Nostrovia | The Pablo Episode\n\nhttps://s3-us-west-2.amazona",
 	}
-	c.client.Subscribe(ctx, []nostr.Filter{{
-		Kinds:   []int{nostr.KindTextNote},
-		Authors: []string{"sss"},
-		Limit:   1,
-	}})
 	_, err = c.client.Publish(ctx, e)
 	return err
 }

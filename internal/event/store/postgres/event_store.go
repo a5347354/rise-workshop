@@ -1,4 +1,4 @@
-package store
+package postgres
 
 import (
 	"github.com/a5347354/rise-workshop/internal"
@@ -20,7 +20,7 @@ func NewEventStore(db *gorm.DB) event.Store {
 	return &eventStore{db}
 }
 
-func (e eventStore) Insert(ctx context.Context, event internal.Event) error {
+func (e *eventStore) Insert(ctx context.Context, event internal.Event) error {
 	if err := e.db.WithContext(ctx).
 		Create(&event).Error; err != nil {
 		return err
