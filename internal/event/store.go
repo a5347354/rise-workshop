@@ -8,4 +8,5 @@ import (
 
 type Store interface {
 	Insert(ctx context.Context, event internal.Event) (err error)
+	SearchByContent(ctx context.Context, keyword string) ([]internal.Event, error)
 }

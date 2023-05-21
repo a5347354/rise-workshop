@@ -6,10 +6,11 @@ import (
 )
 
 type Event struct {
-	ID        string         `json:"id"`
-	Kind      int            `gorm:"column:kind;not null;default:0`
-	Content   string         `gorm:"column:content;type:varchar(500);not null`
-	CreatedAt time.Time      `gorm:"column:created_at"`
+	PK        int64          `gorm:"primaryKey;auto_increment;not_null" json:"-"`
+	ID        string         `gorm:"id" json:"id"`
+	Kind      int            `gorm:"column:kind;not null;default:0" json:"kind"`
+	Content   string         `gorm:"column:content;type:varchar(500);not null" json:"content"`
+	CreatedAt time.Time      `gorm:"column:created_at" json:"-"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 

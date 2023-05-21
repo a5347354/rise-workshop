@@ -27,3 +27,16 @@ func (e *eventStore) Insert(ctx context.Context, event internal.Event) error {
 	}
 	return nil
 }
+
+func (e *eventStore) SearchByContent(ctx context.Context, keyword string) ([]internal.Event, error) {
+	var events []internal.Event
+
+	if err := e.db.WithContext(ctx).
+		Model(&internal.Event{}).
+		Select("id, kind, content").
+		Where("content ILIKE ?", "%"+keyword+"%").
+		Find(&events).Error; err != nil {
+		return []internal.Event{}, err
+	}
+	return events, nil
+}

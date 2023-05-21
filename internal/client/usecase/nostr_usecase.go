@@ -7,7 +7,7 @@ import (
 
 	"context"
 	"fmt"
-	
+
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"

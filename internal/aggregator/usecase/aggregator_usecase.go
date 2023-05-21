@@ -1,11 +1,13 @@
 package usecase
 
 import (
-	"context"
+	"github.com/a5347354/rise-workshop/internal"
 	"github.com/a5347354/rise-workshop/internal/aggregator"
 	"github.com/a5347354/rise-workshop/internal/client"
 	"github.com/a5347354/rise-workshop/internal/client/usecase"
 	"github.com/a5347354/rise-workshop/internal/event"
+
+	"context"
 	"strings"
 	"sync"
 
@@ -65,4 +67,8 @@ func (u aggregatorUsecase) StartCollect() error {
 
 func (u aggregatorUsecase) Close() {
 	close(u.limitClient)
+}
+
+func (u aggregatorUsecase) ListEventByKeyword(ctx context.Context, keyword string) ([]internal.Event, error) {
+	return u.eStore.SearchByContent(ctx, keyword)
 }
