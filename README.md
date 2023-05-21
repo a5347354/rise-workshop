@@ -18,6 +18,12 @@ go install golang.org/x/vuln/cmd/govulncheck@latest
 go tool cover -html=coverage.out
 ```
 
+### Docker Build
+```bash
+docker build --build-arg BUILD_DIR=cmd/aggregator -t aggregator -f build/dockerfile/Dockerfile .
+docker run -d -p 8080:8080 aggregator    
+```
+
 ## Phase 1
 Building a simple nostr client
 
