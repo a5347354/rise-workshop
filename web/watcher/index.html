@@ -100,7 +100,7 @@
         function search() {
             let keyword = document.getElementById('searchInput').value;
 
-            let apiUrl = 'https://localhost:8080/api/search?keyword=' + encodeURIComponent(keyword);
+            let apiUrl = '/api/v1/events?keyword=' + encodeURIComponent(keyword);
 
             axios.get(apiUrl)
                 .then(function(response) {
@@ -123,13 +123,20 @@
                     console.error(error);
                 });
         }
+
+        function handleKeyPress(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                search();
+            }
+        }
     </script>
 </head>
 <body>
     <h1>Watcher</h1>
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="keyword" required>
-        <button id="searchButton" onclick="mockSearch()">Search</button>
+        <input type="text" id="searchInput" placeholder="keyword" required onkeypress="handleKeyPress(event)">
+        <button id="searchButton" onclick="search()">Search</button>
     </div>
     <div id="searchResults"></div>
 </body>
