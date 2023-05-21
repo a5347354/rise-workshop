@@ -93,6 +93,7 @@ func (c *nostrClient) Subscribe(ctx context.Context, filters nostr.Filters) (*no
 }
 
 func (c *nostrClient) Disconnect(ctx context.Context) error {
+
 	if c.relay != nil {
 		return c.relay.Close()
 	}

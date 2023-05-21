@@ -5,13 +5,11 @@ import (
 	"github.com/a5347354/rise-workshop/internal/aggregator/usecase"
 	"github.com/a5347354/rise-workshop/internal/event/store/postgres"
 	"github.com/a5347354/rise-workshop/pkg"
-
-	"context"
-	"strings"
-	"time"
-
 	"github.com/spf13/viper"
+
 	"go.uber.org/fx"
+	//_ "net/http/pprof"
+	"strings"
 )
 
 func init() {
@@ -29,11 +27,12 @@ func main() {
 			usecase.NewAggregator,
 		),
 		fx.Invoke(
-			func(usecase aggregator.Usecase) error {
-				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-				defer cancel()
-				usecase.Collect(ctx)
-				time.Sleep(time.Second * 360)
+			func(u aggregator.Usecase) error {
+				// debug goruntine
+				//go func() {
+				//	log.Println(http.ListenAndServe("localhost:6060", nil))
+				//}()
+				u.StartCollect()
 				return nil
 			},
 		),

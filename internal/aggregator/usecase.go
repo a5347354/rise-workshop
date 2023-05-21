@@ -6,4 +6,5 @@ import (
 
 type Usecase interface {
 	Collect(ctx context.Context)
+	StartCollect() error
 }

@@ -6,8 +6,8 @@ import (
 	"github.com/a5347354/rise-workshop/pkg"
 
 	"context"
-	"time"
-
+	"fmt"
+	
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/sirupsen/logrus"
 	"go.uber.org/fx"
@@ -25,7 +25,6 @@ func NewClient(lc fx.Lifecycle, eStore event.Store) client.Usecase {
 	}
 }
 
-// TODO: Don't let process down
 func (c clientUsecase) Collect(ctx context.Context, url string) error {
 	err := c.client.ConnectURL(ctx, url)
 	if err != nil {
@@ -37,12 +36,12 @@ func (c clientUsecase) Collect(ctx context.Context, url string) error {
 		logrus.Error(err)
 		return err
 	}
+	logrus.Info(fmt.Sprintf("[START] Collect from: %s", url))
 	for ev := range sub.Events {
 		logrus.Info(*ev)
 		err := c.eStore.Insert(ctx, pkg.NostrEventToEvent(*ev))
 		if err != nil {
 			logrus.Error(err)
-			return err
 		}
 	}
 	return nil
@@ -53,15 +52,7 @@ func (c clientUsecase) SendMessage(ctx context.Context) error {
 	if err != nil {
 		logrus.Panic(err)
 	}
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
-	defer cancel()
-	sub, err := c.client.Subscribe(ctx, nostr.Filters{nostr.Filter{Kinds: []int{nostr.KindTextNote}}})
-	if err != nil {
-		logrus.Panic(err)
-	}
-	for ev := range sub.Events {
-		logrus.WithField("time", time.Now()).Warn(ev)
-	}
+
 	e := nostr.Event{
 		Kind: 31337,
 		Tags: nostr.Tags{
