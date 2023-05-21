@@ -48,3 +48,18 @@ func (mr *MockStoreMockRecorder) Insert(ctx, event interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockStore)(nil).Insert), ctx, event)
 }
+
+// SearchByContent mocks base method.
+func (m *MockStore) SearchByContent(ctx context.Context, keyword string) ([]internal.Event, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SearchByContent", ctx, keyword)
+	ret0, _ := ret[0].([]internal.Event)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SearchByContent indicates an expected call of SearchByContent.
+func (mr *MockStoreMockRecorder) SearchByContent(ctx, keyword interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchByContent", reflect.TypeOf((*MockStore)(nil).SearchByContent), ctx, keyword)
+}
