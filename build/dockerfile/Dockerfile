@@ -12,4 +12,5 @@ RUN apt-get update && \
     apt-get install -y ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 COPY --from=build /src/app /app
+COPY ./web /web
 CMD /app

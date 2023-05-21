@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/a5347354/rise-workshop/internal/aggregator"
+	"github.com/a5347354/rise-workshop/internal/aggregator/delivery"
 	"github.com/a5347354/rise-workshop/internal/aggregator/usecase"
 	"github.com/a5347354/rise-workshop/internal/event/store/postgres"
 	"github.com/a5347354/rise-workshop/pkg"
@@ -22,11 +23,13 @@ func main() {
 
 	fx.New(
 		fx.Provide(
+			pkg.NewRouter,
 			pkg.NewPostgresClient,
 			postgres.NewEventStore,
 			usecase.NewAggregator,
 		),
 		fx.Invoke(
+			delivery.RegisterAggregatorHandler,
 			func(u aggregator.Usecase) error {
 				// debug goruntine
 				//go func() {
