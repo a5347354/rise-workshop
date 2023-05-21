@@ -6,7 +6,7 @@ import (
 
 	"fmt"
 	"net/http"
-	
+
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

@@ -5,9 +5,10 @@ import (
 	deliveryMock "github.com/a5347354/rise-workshop/internal/relay/mocks"
 
 	"context"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	. "github.com/smartystreets/goconvey/convey"
-	"testing"
 )
 
 func Test_relayUsecase_ReceiveMessage_Event(t *testing.T) {
