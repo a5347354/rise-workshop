@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Watcher</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .search-container {
+            max-width: 400px;
+            margin: 0 auto;
+            display: flex;
+        }
+
+        #searchInput {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        #searchButton {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #searchButton:hover {
+            background-color: #45a049;
+        }
+
+        #searchResults {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .result-item span {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+    <script>
+        function mockSearch() {
+            var events = [
+                { id: 1, content: 'Lorem ipsum dolor sit amet' },
+                { id: 2, content: 'Consectetur adipiscing elit' },
+                { id: 3, content: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua' },
+                { id: 4, content: 'Ut enim ad minim veniam' },
+                { id: 5, content: 'Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat' },
+                { id: 6, content: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur' },
+                { id: 7, content: 'Excepteur sint occaecat cupidatat non proident' },
+                { id: 8, content: 'Sunt in culpa qui officia deserunt mollit anim id est laborum' }
+            ];
+            let results = document.getElementById('searchResults');
+            results.innerHTML = '';
+            for (var i = 0; i < events.length; i++) {
+                var event = events[i];
+                var resultItem = document.createElement('div');
+                resultItem.classList.add('result-item');
+                resultItem.innerHTML = '<span>Event ID: ' + event.id + '</span><br><span>Content: ' + event.content + '</span>';
+                results.appendChild(resultItem);
+            }
+        }
+
+        function search() {
+            let keyword = document.getElementById('searchInput').value;
+
+            let apiUrl = 'https://localhost:8080/api/search?keyword=' + encodeURIComponent(keyword);
+
+            axios.get(apiUrl)
+                .then(function(response) {
+                    let events = response.data.events;
+
+                    let results = document.getElementById('searchResults');
+                    results.innerHTML = '';
+
+                    for (let i = 0; i < events.length; i++) {
+                        let event = events[i];
+                        if (event.content.includes(keyword)) {
+                            let resultItem = document.createElement('div');
+                            resultItem.classList.add('result-item');
+                            resultItem.innerHTML = '<span>Event ID: ' + event.id + '</span><br><span>Content: ' + event.content + '</span>';
+                            results.appendChild(resultItem);
+                        }
+                    }
+                })
+                .catch(function(error) {
+                    console.error(error);
+                });
+        }
+    </script>
+</head>
+<body>
+    <h1>Watcher</h1>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="keyword" required>
+        <button id="searchButton" onclick="mockSearch()">Search</button>
+    </div>
+    <div id="searchResults"></div>
+</body>
+</html>
