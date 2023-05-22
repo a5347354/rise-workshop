@@ -28,7 +28,8 @@ func NewClient(lc fx.Lifecycle, eStore event.Store) client.Usecase {
 func (c clientUsecase) Collect(ctx context.Context, url string) error {
 	err := c.client.ConnectURL(ctx, url)
 	if err != nil {
-		logrus.Warn(err)
+		logrus.WithField("action", "sleep 30 sec").Warn(err)
+		time.Sleep(30 * time.Second)
 		return err
 	}
 	sub, err := c.client.Subscribe(ctx, nostr.Filters{nostr.Filter{Kinds: []int{nostr.KindTextNote}}})
