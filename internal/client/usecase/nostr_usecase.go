@@ -7,6 +7,7 @@ import (
 
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/sirupsen/logrus"
