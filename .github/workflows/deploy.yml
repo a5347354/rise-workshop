@@ -39,6 +39,7 @@ jobs:
         include:
           - component: "client"
           - component: "relay"
+          - component: "aggregator"
 
     steps:
       - name: Checkout
