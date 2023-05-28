@@ -24,6 +24,7 @@ func main() {
 	fx.New(
 		fx.Provide(
 			pkg.NewPostgresClient,
+			pkg.NewSub,
 			postgres.NewEventStore,
 			usecase.NewConsumer,
 		),
@@ -33,4 +34,5 @@ func main() {
 			},
 		),
 	).Run()
+
 }

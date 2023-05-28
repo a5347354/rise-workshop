@@ -3,15 +3,18 @@ package pkg
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/pubsub"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"go.uber.org/fx"
 )
 
 func getTopicName() string {
-	return viper.GetString("service.id")
+	arr := strings.Split(viper.GetString("service.id"), "_")
+	return arr[0]
 }
 
 func getSubscriberName() string {
@@ -20,7 +23,7 @@ func getSubscriberName() string {
 }
 
 func getProjectName() string {
-	return viper.GetString("service.id")
+	return viper.GetString("gcp.project.id")
 }
 
 func NewPubSubWithoutLC(ctx context.Context) (pubsubClient, error) {
@@ -40,83 +43,99 @@ type PubsubClient interface {
 }
 
 type pubsubClient struct {
-	client *pubsub.Client
-	topic  *pubsub.Topic
+	client         *pubsub.Client
+	topic          *pubsub.Topic
+	subscriptionID string
 }
 
-func NewPub(lc fx.Lifecycle) (pubsubClient, error) {
+func NewPub(lc fx.Lifecycle) (PubsubClient, error) {
 	ctx := context.Background()
 	client, err := NewPubSubWithoutLC(ctx)
 	if err != nil {
-		return pubsubClient{}, err
+		return &pubsubClient{}, err
 	}
 	lc.Append(
 		fx.Hook{
 			OnStop: func(ctx context.Context) error {
-				return client.close()
+				return client.close(context.Background())
 			},
 		},
 	)
 	if err := client.createTopic(ctx, getTopicName()); err != nil {
-		return pubsubClient{}, err
+		return &pubsubClient{}, err
 	}
-	return client, nil
+	return &client, nil
 }
 
-func NewSub(lc fx.Lifecycle) (pubsubClient, error) {
+func NewSub(lc fx.Lifecycle) (PubsubClient, error) {
 	ctx := context.Background()
 	client, err := NewPubSubWithoutLC(ctx)
 	if err != nil {
-		return pubsubClient{}, err
+		return &pubsubClient{}, err
 	}
 	lc.Append(
 		fx.Hook{
 			OnStop: func(ctx context.Context) error {
-				return client.close()
+				logrus.Info(1122333)
+				return client.close(ctx)
 			},
 		},
 	)
 	if err := client.createTopic(ctx, getTopicName()); err != nil {
-		return pubsubClient{}, err
+		logrus.Warn(err)
+		return &pubsubClient{}, err
 	}
-	return client, client.createSubscription(ctx, getSubscriberName())
+
+	if err := client.createSubscription(ctx); err != nil {
+		return nil, err
+	}
+	return &client, nil
 }
 
-func (c pubsubClient) createTopic(ctx context.Context, topic string) error {
+func (c *pubsubClient) createTopic(ctx context.Context, topic string) error {
 	t := c.client.Topic(topic)
 	ok, err := t.Exists(ctx)
 	if err != nil {
 		return err
 	}
 	if ok {
-		c.topic = t
+		c.setTopic(t)
 		return nil
 	}
 	t, err = c.client.CreateTopic(ctx, topic)
 	if err != nil {
 		return err
 	}
-	c.topic = t
+	c.setTopic(t)
 	return nil
 }
 
-func (c pubsubClient) createSubscription(ctx context.Context, name string) error {
-	sub, err := c.client.CreateSubscription(ctx, name, pubsub.SubscriptionConfig{
+func (c *pubsubClient) setTopic(t *pubsub.Topic) {
+	c.topic = t
+}
+
+func (c *pubsubClient) createSubscription(ctx context.Context) error {
+	c.setSubscriptionID()
+	sub, err := c.client.CreateSubscription(ctx, c.subscriptionID, pubsub.SubscriptionConfig{
 		Topic:       c.topic,
 		AckDeadline: 20 * time.Second,
 	})
 	if err != nil {
+		logrus.Warn(err)
 		return err
 	}
 	fmt.Printf("Created subscription: %v\n", sub)
 	return nil
 }
 
-func (c pubsubClient) close() error {
+func (c *pubsubClient) close(ctx context.Context) error {
+	if c.subscriptionID != "" {
+		c.client.DetachSubscription(ctx, c.subscriptionID)
+	}
 	return c.client.Close()
 }
 
-func (c pubsubClient) Publish(data []byte) error {
+func (c *pubsubClient) Publish(data []byte) error {
 	ctx := context.Background()
 	result := c.topic.Publish(ctx, &pubsub.Message{
 		Data: data,
@@ -129,11 +148,15 @@ func (c pubsubClient) Publish(data []byte) error {
 	return nil
 }
 
-func (c pubsubClient) Consume(ctx context.Context, receive func(ctx context.Context, msg *pubsub.Message)) error {
-	sub := c.client.Subscription(getSubscriberName())
+func (c *pubsubClient) Consume(ctx context.Context, receive func(ctx context.Context, msg *pubsub.Message)) error {
+	sub := c.client.Subscription(c.subscriptionID)
 	err := sub.Receive(ctx, receive)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (c *pubsubClient) setSubscriptionID() {
+	c.subscriptionID = getSubscriberName()
 }
