@@ -5,12 +5,14 @@ import (
 	"github.com/a5347354/rise-workshop/internal/aggregator/delivery"
 	"github.com/a5347354/rise-workshop/internal/aggregator/usecase"
 	"github.com/a5347354/rise-workshop/internal/event/store/postgres"
+	"github.com/a5347354/rise-workshop/internal/event/store/pubsub"
 	"github.com/a5347354/rise-workshop/pkg"
-	"github.com/spf13/viper"
 
+	"strings"
+
+	"github.com/spf13/viper"
 	"go.uber.org/fx"
 	//_ "net/http/pprof"
-	"strings"
 )
 
 func init() {
@@ -25,7 +27,9 @@ func main() {
 		fx.Provide(
 			pkg.NewRouter,
 			pkg.NewPostgresClient,
+			pkg.NewSub,
 			postgres.NewEventStore,
+			pubsub.NewEventStore,
 			usecase.NewAggregator,
 		),
 		fx.Invoke(

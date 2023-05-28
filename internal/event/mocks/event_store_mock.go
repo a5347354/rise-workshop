@@ -63,3 +63,40 @@ func (mr *MockStoreMockRecorder) SearchByContent(ctx, keyword interface{}) *gomo
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchByContent", reflect.TypeOf((*MockStore)(nil).SearchByContent), ctx, keyword)
 }
+
+// MockAsyncStore is a mock of AsyncStore interface.
+type MockAsyncStore struct {
+	ctrl     *gomock.Controller
+	recorder *MockAsyncStoreMockRecorder
+}
+
+// MockAsyncStoreMockRecorder is the mock recorder for MockAsyncStore.
+type MockAsyncStoreMockRecorder struct {
+	mock *MockAsyncStore
+}
+
+// NewMockAsyncStore creates a new mock instance.
+func NewMockAsyncStore(ctrl *gomock.Controller) *MockAsyncStore {
+	mock := &MockAsyncStore{ctrl: ctrl}
+	mock.recorder = &MockAsyncStoreMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockAsyncStore) EXPECT() *MockAsyncStoreMockRecorder {
+	return m.recorder
+}
+
+// Insert mocks base method.
+func (m *MockAsyncStore) Insert(ctx context.Context, event internal.Event) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Insert", ctx, event)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Insert indicates an expected call of Insert.
+func (mr *MockAsyncStoreMockRecorder) Insert(ctx, event interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockAsyncStore)(nil).Insert), ctx, event)
+}

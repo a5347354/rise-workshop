@@ -16,10 +16,10 @@ import (
 
 type clientUsecase struct {
 	client pkg.NostrClient
-	eStore event.Store
+	eStore event.AsyncStore
 }
 
-func NewClient(lc fx.Lifecycle, eStore event.Store) client.Usecase {
+func NewClient(lc fx.Lifecycle, eStore event.AsyncStore) client.Usecase {
 	return &clientUsecase{
 		client: pkg.NewNostrClient(lc),
 		eStore: eStore,

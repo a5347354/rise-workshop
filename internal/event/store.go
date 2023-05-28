@@ -10,3 +10,7 @@ type Store interface {
 	Insert(ctx context.Context, event internal.Event) (err error)
 	SearchByContent(ctx context.Context, keyword string) ([]internal.Event, error)
 }
+
+type AsyncStore interface {
+	Insert(ctx context.Context, event internal.Event) (err error)
+}
