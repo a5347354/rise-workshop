@@ -15,7 +15,8 @@ func getTopicName() string {
 }
 
 func getSubscriberName() string {
-	return fmt.Sprintf("%s_subscriber", viper.GetString("service.id"))
+	randStr, _ := GenerateAlphanumericString(6)
+	return fmt.Sprintf("%s_subscriber_%s", viper.GetString("service.id"), randStr)
 }
 
 func getProjectName() string {
