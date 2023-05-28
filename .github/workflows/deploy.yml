@@ -85,6 +85,7 @@ jobs:
           build-args: |
             "BUILD_DIR=cmd/${{ matrix.component }}"
             "SERVICE_ID=${{ matrix.component }}"
+            "PUBSUB_CRED=${{ secret.RISE_PUBSUB_CREDENTIALS }}"
 
       - name: Deploy Docker image
         run: |-
