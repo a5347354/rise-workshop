@@ -53,6 +53,7 @@ jobs:
       - name: Set Image Tag
         run: |
           echo "IMAGE_TAG=${{ matrix.component }}" >> $GITHUB_ENV
+          echo "GCP_APP_NAME=$(echo ${{ matrix.component }} | sed 's/_/-/g')" >> $GITHUB_ENV
 
       - name: Authenticate to Google Cloud
         id: auth
@@ -90,5 +91,5 @@ jobs:
       - name: Deploy Docker image
         run: |-
           gcloud config set run/region $REGISTRY \
-            && gcloud run deploy "${{ matrix.component }}-${{ env.PROJECT_ID }}" --image "$REGISTRY-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_TAG:${{ github.sha }}" --region $REGISTRY --platform managed
+            && gcloud run deploy "${{ env.GCP_APP_NAME }}-${{ env.PROJECT_ID }}" --image "$REGISTRY-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_TAG:${{ github.sha }}" --region $REGISTRY --platform managed
     
