@@ -24,6 +24,7 @@ func main() {
 		fx.Provide(
 			pkg.NewRouter,
 			pkg.NewPostgresClient,
+			pkg.NewPub,
 
 			pubsub.NewEventStore,
 			usecase.NewClient,
