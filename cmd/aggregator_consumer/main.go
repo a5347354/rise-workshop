@@ -6,6 +6,7 @@ import (
 	"github.com/a5347354/rise-workshop/internal/aggregator_consumer/usecase"
 	"github.com/a5347354/rise-workshop/internal/event/store/postgres"
 	"github.com/a5347354/rise-workshop/pkg"
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 
 	"go.uber.org/fx"
@@ -23,14 +24,16 @@ func main() {
 
 	fx.New(
 		fx.Provide(
+			pkg.NewRouter,
 			pkg.NewPostgresClient,
 			pkg.NewSub,
 			postgres.NewEventStore,
 			usecase.NewConsumer,
 		),
 		fx.Invoke(
-			func(u consumer.Usecase) error {
-				return u.Consume(context.Background())
+			func(engine *gin.Engine, u consumer.Usecase) error {
+				go u.Consume(context.Background())
+				return nil
 			},
 		),
 	).Run()
