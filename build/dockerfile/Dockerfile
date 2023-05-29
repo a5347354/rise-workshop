@@ -17,5 +17,4 @@ RUN apt-get update && \
 COPY ./web /web
 COPY --from=build /*.json /
 COPY --from=build /src/app /app
-COPY ./web /web
 CMD /app

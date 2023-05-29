@@ -41,7 +41,7 @@ jobs:
           - component: "client"
           - component: "relay"
           - component: "aggregator"
-          - component: "aggregator_consumer"
+          - component: "aggregator-consumer"
 
     steps:
       - name: Checkout
