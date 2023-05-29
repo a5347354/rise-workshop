@@ -124,7 +124,7 @@ func (c *pubsubClient) createSubscription(ctx context.Context) error {
 		logrus.Warn(err)
 		return err
 	}
-	fmt.Printf("Created subscription: %v\n", sub)
+	fmt.Printf("Created subscription: %v, topic: %s\n", sub, c.topic)
 	return nil
 }
 
@@ -144,7 +144,7 @@ func (c *pubsubClient) Publish(data []byte) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Published a message; msg ID: %v\n", id)
+	fmt.Printf("Published a message; topic: %s, msg ID: %v\n", c.topic.String(), id)
 	return nil
 }
 
