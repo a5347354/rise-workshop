@@ -13,7 +13,7 @@ import (
 )
 
 func getTopicName() string {
-	arr := strings.Split(viper.GetString("service.id"), "-")
+	arr := strings.Split(viper.GetString("service.id"), "_")
 	return arr[0]
 }
 
