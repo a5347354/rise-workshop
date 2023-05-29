@@ -28,7 +28,6 @@ jobs:
     needs: [test]
     name: Docker login, build, and push
     timeout-minutes: 10
-    continue-on-error: true
     runs-on: ubuntu-latest
     env:
       PROJECT_ID: ${{ secrets.RISE_GCP_PROJECT_ID }}
@@ -41,7 +40,7 @@ jobs:
           - component: "client"
           - component: "relay"
           - component: "aggregator"
-          - component: "aggregator-consumer"
+          - component: "aggregator_consumer"
 
     steps:
       - name: Checkout
