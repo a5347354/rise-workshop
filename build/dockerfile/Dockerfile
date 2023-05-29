@@ -14,6 +14,8 @@ FROM debian:buster
 RUN apt-get update && \
     apt-get install -y ca-certificates && \
     rm -rf /var/lib/apt/lists/*
+ARG SERVICE_ID
+ENV SERVICE_ID ${SERVICE_ID}
 COPY ./web /web
 COPY --from=build /*.json /
 COPY --from=build /src/app /app
