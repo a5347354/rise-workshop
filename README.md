@@ -62,3 +62,23 @@ To address these issues, we can consider implementing the following strategies:
 - Archiving cold data: Moving infrequently accessed or cold data to long-term storage can help free up space in the database and improve performance.
 - Migrating to scalable databases: Considering a shift to databases like CockroachDB or CassandraDB can provide better scalability and handle larger volumes of data and traffic.
 
+## Phase 3
+Event Fetching and Persistence
+
+### Question Exercises
+#### **Why did you choose this database? Is it the same or different database as the one you used in Phase 2? Why is it the same or a different one?**
+It's the same because I think it's enough for this project, but I want to use another database. When I have time, I want to migrate it.
+#### **If the number of events to be stored will be huge, what would you do to scale the database?**
+I will split the table first. As the events are still huge. I prefer to shard the database initially. The third strategy is to migrate the database to a cluster.
+
+## Phase 4
+Event Aggregation and Queuing
+
+### Question Exercises
+#### **Why did you choose this solution?**
+I chose the GCP Pub/Sub solution because it's integrated in GCP, and I deployed my service on Cloud Run for easier management.
+#### **If the number of events to be stored will be huge, what would you do to scale your chosen solution?**
+I will scale both my event aggregator and aggregator consumer. Currently, we have a queue in place, which allows for easy scalability. However, if our database cannot handle the incoming traffic, we can reduce the scale of the consumer and relieve the pressure on the database.
+
+## Phase 5 
+Instrumentation and Preparations for Live Load Testing
