@@ -1,21 +1,25 @@
 package pkg
 
 import (
-	"github.com/spf13/viper"
-	jaeger_propagator "go.opentelemetry.io/contrib/propagators/jaeger"
-	"go.opentelemetry.io/otel"
+	"context"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/jaeger"
+	"log"
+
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	"github.com/spf13/viper"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
 	tracesdk "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
 func NewTracerProvider() trace.TracerProvider {
-	exp, err := jaeger.New(jaeger.WithAgentEndpoint())
+	ctx := context.Background()
+	projectID := viper.GetString("gcp.project.id")
+	exp, err := texporter.New(texporter.WithProjectID(projectID))
 	if err != nil {
-		panic(err)
+		log.Fatalf("texporter.New: %v", err)
 	}
 
 	tp := tracesdk.NewTracerProvider(
@@ -31,9 +35,10 @@ func NewTracerProvider() trace.TracerProvider {
 			}()),
 		)),
 	)
+	defer tp.ForceFlush(ctx) // flushes any pending spans
 
 	otel.SetTracerProvider(tp)
-	otel.SetTextMapPropagator(jaeger_propagator.Jaeger{})
+	//otel.SetTextMapPropagator(jaeger_propagator.Jaeger{})
 
 	return otel.GetTracerProvider()
 }
