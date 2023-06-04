@@ -28,6 +28,7 @@ func main() {
 			pkg.NewRouter,
 			pkg.NewPostgresClient,
 			pkg.NewPub,
+			delivery.NewAggregatorMetrics,
 			postgres.NewEventStore,
 			pubsub.NewEventStore,
 			usecase.NewAggregator,
