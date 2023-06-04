@@ -26,6 +26,7 @@ func main() {
 			pkg.NewWebsocket,
 			pkg.NewRouter,
 
+			delivery.NewRelayMetrics,
 			delivery.NewNotification,
 
 			postgres.NewEventStore,
