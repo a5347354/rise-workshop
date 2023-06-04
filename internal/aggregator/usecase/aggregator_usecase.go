@@ -21,16 +21,17 @@ type aggregatorUsecase struct {
 	url         []string
 	lc          fx.Lifecycle
 	limitClient chan client.Usecase
+	metrics     client.Metrics
 }
 
-func NewAggregator(lc fx.Lifecycle, eStore event.Store, asyncEStore event.AsyncStore) aggregator.Usecase {
+func NewAggregator(lc fx.Lifecycle, eStore event.Store, asyncEStore event.AsyncStore, metrics client.Metrics) aggregator.Usecase {
 	url := strings.Split(viper.GetString("relays.url"), ",")
-	return &aggregatorUsecase{eStore, asyncEStore, url, lc, make(chan client.Usecase, len(url))}
+	return &aggregatorUsecase{eStore, asyncEStore, url, lc, make(chan client.Usecase, len(url)), metrics}
 }
 
 func (u aggregatorUsecase) Collect(ctx context.Context) {
 	for _, url := range u.url {
-		c := usecase.NewClient(u.lc, u.asyncEStore)
+		c := usecase.NewClient(u.lc, u.asyncEStore, u.metrics)
 		u.limitClient <- c
 		go func(limitClient chan client.Usecase) {
 			err := c.Collect(ctx, url)
