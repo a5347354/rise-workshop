@@ -4,6 +4,7 @@ import (
 	"github.com/a5347354/rise-workshop/internal/aggregator"
 	"github.com/a5347354/rise-workshop/internal/aggregator/delivery"
 	"github.com/a5347354/rise-workshop/internal/aggregator/usecase"
+	client_delivery "github.com/a5347354/rise-workshop/internal/client/delivery"
 	"github.com/a5347354/rise-workshop/internal/event/store/postgres"
 	"github.com/a5347354/rise-workshop/internal/event/store/pubsub"
 	"github.com/a5347354/rise-workshop/pkg"
@@ -28,7 +29,7 @@ func main() {
 			pkg.NewRouter,
 			pkg.NewPostgresClient,
 			pkg.NewPub,
-			delivery.NewAggregatorMetrics,
+			client_delivery.NewClientMetrics,
 			postgres.NewEventStore,
 			pubsub.NewEventStore,
 			usecase.NewAggregator,

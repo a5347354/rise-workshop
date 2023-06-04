@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"github.com/a5347354/rise-workshop/internal/client"
+	"github.com/a5347354/rise-workshop/internal/client/delivery"
 	"github.com/a5347354/rise-workshop/internal/event"
 	"github.com/a5347354/rise-workshop/pkg"
 
@@ -15,8 +16,9 @@ import (
 )
 
 type clientUsecase struct {
-	client pkg.NostrClient
-	eStore event.AsyncStore
+	client  pkg.NostrClient
+	eStore  event.AsyncStore
+	metrics delivery.Metrics
 }
 
 func NewClient(lc fx.Lifecycle, eStore event.AsyncStore) client.Usecase {
@@ -30,21 +32,27 @@ func (c clientUsecase) Collect(ctx context.Context, url string) error {
 	err := c.client.ConnectURL(ctx, url)
 	if err != nil {
 		logrus.WithField("action", "sleep 30 sec").Warn(err)
+		c.metrics.FailTotal("connect")
 		time.Sleep(30 * time.Second)
 		return err
 	}
 	sub, err := c.client.Subscribe(ctx, nostr.Filters{nostr.Filter{Kinds: []int{nostr.KindTextNote}}})
 	if err != nil {
+		c.metrics.FailTotal("subscribe")
 		logrus.Error(err)
 		return err
 	}
 	logrus.Info(fmt.Sprintf("[START] Collect from: %s", url))
 	for ev := range sub.Events {
+		t := time.Now()
 		logrus.Info(*ev)
 		err := c.eStore.Insert(ctx, pkg.NostrEventToEvent(*ev))
 		if err != nil {
+			c.metrics.FailTotal("insert")
 			logrus.Error(err)
 		}
+		c.metrics.SuccessTotal()
+		c.metrics.ProcessDuration(t)
 	}
 	return nil
 }
@@ -96,6 +104,10 @@ func (c clientUsecase) SendMessage(ctx context.Context) error {
 		},
 		Content: "Nostrovia | The Pablo Episode\n\nhttps://s3-us-west-2.amazona",
 	}
+	c.client.Subscribe(ctx, []nostr.Filter{{
+		Kinds:   []int{nostr.KindTextNote},
+		Authors: []string{"sss"},
+	}})
 	_, err = c.client.Publish(ctx, e)
 	return err
 }

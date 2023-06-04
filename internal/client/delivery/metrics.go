@@ -20,7 +20,7 @@ type metrics struct {
 	websocketConnectionNumber *prometheus.CounterVec
 }
 
-func NewAggregatorMetrics() Metrics {
+func NewClientMetrics() Metrics {
 	return &metrics{
 		successTotal: promauto.NewCounterVec(
 			prometheus.CounterOpts{

@@ -3,12 +3,10 @@ package usecase
 import (
 	"github.com/a5347354/rise-workshop/internal"
 	"github.com/a5347354/rise-workshop/internal/aggregator"
-	"github.com/a5347354/rise-workshop/internal/aggregator/delivery"
 	"github.com/a5347354/rise-workshop/internal/client"
 	"github.com/a5347354/rise-workshop/internal/client/usecase"
 	"github.com/a5347354/rise-workshop/internal/event"
-	"time"
-
+	
 	"context"
 	"strings"
 	"sync"
@@ -23,27 +21,22 @@ type aggregatorUsecase struct {
 	url         []string
 	lc          fx.Lifecycle
 	limitClient chan client.Usecase
-	metrics     delivery.Metrics
 }
 
-func NewAggregator(lc fx.Lifecycle, eStore event.Store, asyncEStore event.AsyncStore, metrics delivery.Metrics) aggregator.Usecase {
+func NewAggregator(lc fx.Lifecycle, eStore event.Store, asyncEStore event.AsyncStore) aggregator.Usecase {
 	url := strings.Split(viper.GetString("relays.url"), ",")
-	return &aggregatorUsecase{eStore, asyncEStore, url, lc, make(chan client.Usecase, len(url)), metrics}
+	return &aggregatorUsecase{eStore, asyncEStore, url, lc, make(chan client.Usecase, len(url))}
 }
 
 func (u aggregatorUsecase) Collect(ctx context.Context) {
 	for _, url := range u.url {
-		t := time.Now()
 		c := usecase.NewClient(u.lc, u.asyncEStore)
 		u.limitClient <- c
 		go func(limitClient chan client.Usecase) {
 			err := c.Collect(ctx, url)
 			if err != nil {
-				u.metrics.FailTotal("collect")
 				<-limitClient
 			}
-			u.metrics.SuccessTotal()
-			u.metrics.ProcessDuration(t)
 		}(u.limitClient)
 	}
 }
