@@ -3,55 +3,26 @@ package delivery
 import (
 	"github.com/a5347354/rise-workshop/internal/relay"
 	"github.com/a5347354/rise-workshop/pkg"
+	"github.com/tidwall/gjson"
 
 	"context"
 	"fmt"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/olahol/melody.v1"
 )
 
-type Metrics struct {
-	successTotal    *prometheus.CounterVec
-	failTotal       *prometheus.CounterVec
-	processDuration *prometheus.HistogramVec
-}
 type relayHandler struct {
 	usecase relay.Usecase
 	metrics Metrics
 }
 
-func RegistWebsocketHandler(engine *gin.Engine, m *melody.Melody, usecase relay.Usecase) {
+func RegistWebsocketHandler(engine *gin.Engine, m *melody.Melody, usecase relay.Usecase, metrics Metrics) {
 	r := &relayHandler{
 		usecase: usecase,
-		metrics: Metrics{
-			successTotal: promauto.NewCounterVec(
-				prometheus.CounterOpts{
-					Name: "success_total",
-					Help: "How many processed success, partitioned by database, table and type.",
-				},
-				[]string{},
-			),
-			failTotal: promauto.NewCounterVec(
-				prometheus.CounterOpts{
-					Name: "fail_total",
-					Help: "How many processed fail, partitioned by database, table, type and stage.",
-				},
-				[]string{},
-			),
-			processDuration: promauto.NewHistogramVec(
-				prometheus.HistogramOpts{
-					Name:    "processed_duration_second",
-					Help:    "The bprocessed latencies in second, partitioned by database, table and type.",
-					Buckets: prometheus.DefBuckets,
-				},
-				[]string{},
-			),
-		},
+		metrics: metrics,
 	}
 	engine.GET("/ws", func(c *gin.Context) {
 		m.HandleRequest(c.Writer, c.Request)
@@ -63,30 +34,32 @@ func RegistWebsocketHandler(engine *gin.Engine, m *melody.Melody, usecase relay.
 	m.HandleMessage(r.message())
 }
 
-func (r relayHandler) handleConnect() func(s *melody.Session) {
+func (r *relayHandler) handleConnect() func(s *melody.Session) {
 	return func(s *melody.Session) {
 		fmt.Printf("[Melody] %v | %s | Connect %s\n", time.Now().Format("2006/01/02 - 15:04:05"), s.Request.RemoteAddr, s.Request.RequestURI)
 
 	}
 }
 
-func (r relayHandler) handleDisconnect() func(s *melody.Session) {
+func (r *relayHandler) handleDisconnect() func(s *melody.Session) {
 	return func(s *melody.Session) {
 		fmt.Printf("[Melody] %v | %s | Disconnect %s\n", time.Now().Format("2006/01/02 - 15:04:05"), s.Request.RemoteAddr, s.Request.RequestURI)
 	}
 }
 
-func (r relayHandler) handleError() func(s *melody.Session, err error) {
+func (r *relayHandler) handleError() func(s *melody.Session, err error) {
 	return func(s *melody.Session, err error) {
 		fmt.Printf("[Melody] %v | %s | Error %s %s\n", time.Now().Format("2006/01/02 - 15:04:05"), s.Request.RemoteAddr, s.Request.RequestURI, err)
 	}
 }
 
-func (r relayHandler) message() func(s *melody.Session, msg []byte) {
+func (r *relayHandler) message() func(s *melody.Session, msg []byte) {
 	return func(s *melody.Session, msg []byte) {
+		eventType := gjson.GetBytes(msg, "0").String()
 		t := time.Now()
 		resp, err := r.usecase.ReceiveMessage(context.Background(), msg, s)
 		if err != nil {
+			r.metrics.FailTotal(eventType, "ReceiveMessage")
 			logrus.Panic(err)
 		}
 		switch resp.Action {
@@ -99,8 +72,7 @@ func (r relayHandler) message() func(s *melody.Session, msg []byte) {
 			s.Request.RemoteAddr,
 			s.Request.RequestURI,
 		)
-
-		r.metrics.successTotal.WithLabelValues().Inc()
-		r.metrics.processDuration.WithLabelValues().Observe(float64(time.Since(t)) / float64(time.Second))
+		r.metrics.SuccessTotal(eventType)
+		r.metrics.ProcessDuration(t, eventType)
 	}
 }
