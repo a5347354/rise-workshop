@@ -3,13 +3,13 @@ package middleware
 import (
 	"strconv"
 	"time"
-	
+
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-func NewPrometheusMetrics() gin.HandlerFunc {
+func NewPrometheus() gin.HandlerFunc {
 	requestsTotal := promauto.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "http_requests_total",
@@ -20,7 +20,7 @@ func NewPrometheusMetrics() gin.HandlerFunc {
 	requestDuration := promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "http_request_duration_second",
-			Help:    "The HTTP request latencies in second.",
+			Help:    "The HTTP request latencies in seconds.",
 			Buckets: prometheus.DefBuckets,
 		},
 		[]string{"url", "method", "code"},

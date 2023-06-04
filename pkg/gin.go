@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	"github.com/a5347354/rise-workshop/pkg/ginx/middleware"
+
 	"context"
 	"fmt"
 	"log"
@@ -8,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"go.uber.org/fx"
@@ -53,9 +56,12 @@ func NewRouter(lc fx.Lifecycle) *gin.Engine {
 	})
 	engine.Use(
 		gin.LoggerWithFormatter(traceIDLogFormatter),
+		middleware.NewPrometheus(),
 		gin.Recovery(),
 	)
-
+	engine.GET(fmt.Sprintf("/%s", viper.GetString("metrics.path")), func(c *gin.Context) {
+		promhttp.Handler().ServeHTTP(c.Writer, c.Request)
+	})
 	serverAddr := viper.GetInt("PORT")
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", serverAddr),
