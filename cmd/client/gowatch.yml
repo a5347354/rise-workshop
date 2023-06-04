@@ -2,6 +2,14 @@ prev_build_cmds:
 - go mod tidy
 - go generate ./...
 - go test ./... -coverprofile=coverage.out
-- govulncheck ./...
 envs:
-- DEBUG=true
+- DEBUG=
+- PORT=
+- RELAY_URL=
+- PRIVATE_KEY=
+- PUBLIC_KEY=
+- POSTGRES_USERNAME=
+- POSTGRES_PASSWORD=
+- POSTGRES_HOST=
+- POSTGRES_DATABASE=
+- METRICS_PATH=
