@@ -82,3 +82,17 @@ I will scale both my event aggregator and aggregator consumer. Currently, we hav
 
 ## Phase 5 
 Instrumentation and Preparations for Live Load Testing
+
+### Question Exercises
+#### **Why did you choose these 5 metrics?**
+- successTotal: This metric counts the number of successful processing events. It helps us track the success rate of each component. 
+- failTotal: This metric counts the number of failed processing events. It allows us to monitor errors and failures that occur during different stages of processing and within each component.
+- processDuration: This metric measures the duration of processing. It provides insights into the processing time.
+- websocketConnectionNumber: This metric counts the number of WebSocket connections connected to the relay. 
+#### **What kind of errors or issues do you expect them to help you monitor?**
+When the failure rates are increasing, the success count becomes zero or the average latency is rising, it indicates that something is wrong, and we need to identify the root cause.
+#### **If you had more time, what other tools would you use or metrics would you instrument and why?**
+I will try using GCP solutions, such as Cloud Mertics, because it seems very convenient to have everything on the same GUI.
+
+## Demo
+![img.png](img.png)
