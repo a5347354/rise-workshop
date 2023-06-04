@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	consumer "github.com/a5347354/rise-workshop/internal/aggregator_consumer"
+	"github.com/a5347354/rise-workshop/internal/aggregator_consumer/delivery"
 	"github.com/a5347354/rise-workshop/internal/aggregator_consumer/usecase"
 	"github.com/a5347354/rise-workshop/internal/event/store/postgres"
 	"github.com/a5347354/rise-workshop/pkg"
@@ -27,6 +28,7 @@ func main() {
 			pkg.NewRouter,
 			pkg.NewPostgresClient,
 			pkg.NewSub,
+			delivery.NewConsumerMetrics,
 			postgres.NewEventStore,
 			usecase.NewConsumer,
 		),
