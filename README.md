@@ -88,7 +88,9 @@ Instrumentation and Preparations for Live Load Testing
 - successTotal: This metric counts the number of successful processing events. It helps us track the success rate of each component. 
 - failTotal: This metric counts the number of failed processing events. It allows us to monitor errors and failures that occur during different stages of processing and within each component.
 - processDuration: This metric measures the duration of processing. It provides insights into the processing time.
-- websocketConnectionNumber: This metric counts the number of WebSocket connections connected to the relay. 
+- websocketConnectionNumber: This metric counts the number of WebSocket connections connected to the relay.
+
+[Grafana Dashboard Template](scripts/metrics/grafana-dashboard/DISTRISE.json)
 #### **What kind of errors or issues do you expect them to help you monitor?**
 When the failure rates are increasing, the success count becomes zero or the average latency is rising, it indicates that something is wrong, and we need to identify the root cause.
 #### **If you had more time, what other tools would you use or metrics would you instrument and why?**
