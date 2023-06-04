@@ -1,17 +1,11 @@
 package delivery
 
 import (
+	"github.com/a5347354/rise-workshop/internal/client"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"time"
 )
-
-type Metrics interface {
-	SuccessTotal(lvs ...string)
-	FailTotal(lvs ...string)
-	ProcessDuration(t time.Time, lvs ...string)
-	WebsocketConnectionNumber(...string)
-}
 
 type metrics struct {
 	successTotal              *prometheus.CounterVec
@@ -20,7 +14,7 @@ type metrics struct {
 	websocketConnectionNumber *prometheus.CounterVec
 }
 
-func NewClientMetrics() Metrics {
+func NewClientMetrics() client.Metrics {
 	return &metrics{
 		successTotal: promauto.NewCounterVec(
 			prometheus.CounterOpts{

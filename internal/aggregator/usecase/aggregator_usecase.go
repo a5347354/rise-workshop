@@ -6,7 +6,7 @@ import (
 	"github.com/a5347354/rise-workshop/internal/client"
 	"github.com/a5347354/rise-workshop/internal/client/usecase"
 	"github.com/a5347354/rise-workshop/internal/event"
-	
+
 	"context"
 	"strings"
 	"sync"

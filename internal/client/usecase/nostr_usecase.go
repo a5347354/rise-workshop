@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"github.com/a5347354/rise-workshop/internal/client"
-	"github.com/a5347354/rise-workshop/internal/client/delivery"
 	"github.com/a5347354/rise-workshop/internal/event"
 	"github.com/a5347354/rise-workshop/pkg"
 
@@ -18,7 +17,7 @@ import (
 type clientUsecase struct {
 	client  pkg.NostrClient
 	eStore  event.AsyncStore
-	metrics delivery.Metrics
+	metrics client.Metrics
 }
 
 func NewClient(lc fx.Lifecycle, eStore event.AsyncStore) client.Usecase {

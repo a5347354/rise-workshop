@@ -1,10 +1,10 @@
 package usecase
 
 import (
-	eventMock "github.com/a5347354/rise-workshop/internal/event/mocks"
-	clientMock "github.com/a5347354/rise-workshop/pkg/mocks"
-
 	"context"
+	clientMock "github.com/a5347354/rise-workshop/internal/client/mocks"
+	eventMock "github.com/a5347354/rise-workshop/internal/event/mocks"
+	nostrMock "github.com/a5347354/rise-workshop/pkg/mocks"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -15,7 +15,7 @@ import (
 
 func Test_clientUsecase_Collect(t *testing.T) {
 	Convey("Collect", t, func() {
-		mockEventStore, mockNostrClient, usecase := given(t)
+		mockEventStore, mockNostrClient, mockMetrics, usecase := given(t)
 		url := "http://localhost"
 		mockNostrClient.EXPECT().ConnectURL(gomock.Any(), url).Return(nil)
 		eventChan := make(chan *nostr.Event, len(url))
@@ -31,6 +31,8 @@ func Test_clientUsecase_Collect(t *testing.T) {
 			Events: eventChan,
 		}, nil)
 		mockEventStore.EXPECT().Insert(gomock.Any(), gomock.Any()).Return(nil).Times(1)
+		mockMetrics.EXPECT().SuccessTotal()
+		mockMetrics.EXPECT().ProcessDuration(gomock.Any())
 
 		var g errgroup.Group
 		g.Go(func() error {
@@ -41,13 +43,15 @@ func Test_clientUsecase_Collect(t *testing.T) {
 	})
 }
 
-func given(t *testing.T) (*eventMock.MockStore, *clientMock.MockNostrClient, *clientUsecase) {
+func given(t *testing.T) (*eventMock.MockStore, *nostrMock.MockNostrClient, *clientMock.MockMetrics, *clientUsecase) {
 	ctrl := gomock.NewController(t)
 	mockStore := eventMock.NewMockStore(ctrl)
-	mockNostrClient := clientMock.NewMockNostrClient(ctrl)
+	mockNostrClient := nostrMock.NewMockNostrClient(ctrl)
+	mockMetrics := clientMock.NewMockMetrics(ctrl)
 	u := &clientUsecase{
-		client: mockNostrClient,
-		eStore: mockStore,
+		client:  mockNostrClient,
+		eStore:  mockStore,
+		metrics: mockMetrics,
 	}
-	return mockStore, mockNostrClient, u
+	return mockStore, mockNostrClient, mockMetrics, u
 }
