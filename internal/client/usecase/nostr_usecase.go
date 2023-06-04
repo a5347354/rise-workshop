@@ -20,10 +20,11 @@ type clientUsecase struct {
 	metrics client.Metrics
 }
 
-func NewClient(lc fx.Lifecycle, eStore event.AsyncStore) client.Usecase {
+func NewClient(lc fx.Lifecycle, eStore event.AsyncStore, metrics client.Metrics) client.Usecase {
 	return &clientUsecase{
-		client: pkg.NewNostrClient(lc),
-		eStore: eStore,
+		client:  pkg.NewNostrClient(lc),
+		eStore:  eStore,
+		metrics: metrics,
 	}
 }
 
