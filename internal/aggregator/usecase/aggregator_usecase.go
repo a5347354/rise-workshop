@@ -33,12 +33,12 @@ func (u aggregatorUsecase) Collect(ctx context.Context) {
 	for _, url := range u.url {
 		c := usecase.NewClient(u.lc, u.asyncEStore, u.metrics)
 		u.limitClient <- c
-		go func(limitClient chan client.Usecase) {
+		go func(limitClient chan client.Usecase, url string) {
 			err := c.Collect(ctx, url)
 			if err != nil {
 				<-limitClient
 			}
-		}(u.limitClient)
+		}(u.limitClient, url)
 	}
 }
 
