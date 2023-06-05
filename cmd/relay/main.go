@@ -25,6 +25,7 @@ func main() {
 			pkg.NewPostgresClient,
 			pkg.NewWebsocket,
 			pkg.NewRouter,
+			pkg.NewCronjob,
 
 			delivery.NewRelayMetrics,
 			delivery.NewNotification,
@@ -35,6 +36,7 @@ func main() {
 		),
 		fx.Invoke(
 			delivery.RegistWebsocketHandler,
+			delivery.RegistCronjobHandler,
 		),
 	).Run()
 }

@@ -9,4 +9,5 @@ import (
 
 type Usecase interface {
 	ReceiveMessage(ctx context.Context, msg []byte, session *melody.Session) (pkg.WebSocketMsg, error)
+	SendMessageToSubscriber(ctx context.Context) error
 }

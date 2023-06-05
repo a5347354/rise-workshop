@@ -36,7 +36,7 @@ func (m *MockNotification) EXPECT() *MockNotificationMockRecorder {
 }
 
 // Broadcast mocks base method.
-func (m *MockNotification) Broadcast(ctx context.Context, msg []byte) {
+func (m *MockNotification) Broadcast(ctx context.Context, msg []interface{}) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Broadcast", ctx, msg)
 }

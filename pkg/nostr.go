@@ -74,18 +74,25 @@ func (c *nostrClient) ConnectURL(ctx context.Context, url string) error {
 }
 
 func (c *nostrClient) Publish(ctx context.Context, e nostr.Event) (nostr.Status, error) {
-	e.ID = e.GetID()
-	fmt.Println(e.ID)
-	e.PubKey = c.publicKey
-	e.Kind = 1
-	e.CreatedAt = nostr.Now()
-	e.Content = strings.TrimSpace(e.Content)
-	e.Sign(c.privateKey)
+	e = Sign(e)
 	status, err := c.relay.Publish(ctx, e)
 	if status != nostr.PublishStatusSucceeded {
 		return status, fmt.Errorf("relay no response")
 	}
 	return nostr.PublishStatusFailed, err
+}
+
+func Sign(e nostr.Event) nostr.Event {
+	sk := nostr.GeneratePrivateKey()
+	pk, _ := nostr.GetPublicKey(sk)
+	e.ID = e.GetID()
+	fmt.Println(e.ID)
+	e.PubKey = pk
+	e.Kind = 1
+	e.CreatedAt = nostr.Now()
+	e.Content = strings.TrimSpace(e.Content)
+	e.Sign(sk)
+	return e
 }
 
 func (c *nostrClient) Subscribe(ctx context.Context, filters nostr.Filters) (*nostr.Subscription, error) {
@@ -111,4 +118,16 @@ func NostrEventToEvent(e nostr.Event) internal.Event {
 		Content:   e.Content,
 		CreatedAt: e.CreatedAt.Time(),
 	}
+}
+
+func EventToNostrEvent(e internal.Event) nostr.Event {
+	nostrEvent := nostr.Event{
+		ID:        e.ID,
+		Kind:      e.Kind,
+		Content:   e.Content,
+		CreatedAt: nostr.Timestamp(e.CreatedAt.Unix()),
+		Tags:      nostr.Tags{},
+	}
+	nostrEvent = Sign(nostrEvent)
+	return nostrEvent
 }

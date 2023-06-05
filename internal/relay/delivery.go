@@ -9,5 +9,5 @@ import (
 type Notification interface {
 	Subscribe(ctx context.Context, id string, s *melody.Session)
 	UnSubscribe(ctx context.Context, id string)
-	Broadcast(ctx context.Context, msg []byte)
+	Broadcast(ctx context.Context, msg []interface{})
 }

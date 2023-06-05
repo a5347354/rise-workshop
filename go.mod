@@ -11,6 +11,7 @@ require (
 	github.com/mattn/go-isatty v0.0.17
 	github.com/nbd-wtf/go-nostr v0.17.1
 	github.com/prometheus/client_golang v1.15.1
+	github.com/robfig/cron/v3 v3.0.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/smartystreets/goconvey v1.8.0
 	github.com/spf13/viper v1.15.0

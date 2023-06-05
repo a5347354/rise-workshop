@@ -1,18 +1,21 @@
 package usecase
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"github.com/a5347354/rise-workshop/internal/event"
 	"github.com/a5347354/rise-workshop/internal/relay"
 	"github.com/a5347354/rise-workshop/pkg"
-	"gopkg.in/olahol/melody.v1"
 
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math/big"
 
 	"github.com/nbd-wtf/go-nostr"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/olahol/melody.v1"
 )
 
 type relayUsecase struct {
@@ -24,7 +27,7 @@ func NewRelay(eStore event.Store, notification relay.Notification) relay.Usecase
 	return &relayUsecase{eStore, notification}
 }
 
-func (c relayUsecase) ReceiveMessage(ctx context.Context, msg []byte, session *melody.Session) (pkg.WebSocketMsg, error) {
+func (c *relayUsecase) ReceiveMessage(ctx context.Context, msg []byte, session *melody.Session) (pkg.WebSocketMsg, error) {
 	var message []json.RawMessage
 	if err := json.Unmarshal(msg, &message); err != nil {
 		return pkg.WebSocketMsg{}, nil
@@ -52,21 +55,20 @@ func (c relayUsecase) ReceiveMessage(ctx context.Context, msg []byte, session *m
 	}
 }
 
-func (c relayUsecase) handleEventMessage(ctx context.Context, eventJSON json.RawMessage) (pkg.WebSocketMsg, error) {
+func (c *relayUsecase) handleEventMessage(ctx context.Context, eventJSON json.RawMessage) (pkg.WebSocketMsg, error) {
 	event, msg, err := c.verify(eventJSON)
 	if err != nil {
 		return msg, err
 	}
 
 	c.eStore.Insert(ctx, pkg.NostrEventToEvent(event))
-	c.notification.Broadcast(ctx, eventJSON)
 	return pkg.WebSocketMsg{
 		Action: pkg.WebSocketMsgTypeNormal,
 		Msg:    eventJSON,
 	}, nil
 }
 
-func (c relayUsecase) verify(eventJSON json.RawMessage) (nostr.Event, pkg.WebSocketMsg, error) {
+func (c *relayUsecase) verify(eventJSON json.RawMessage) (nostr.Event, pkg.WebSocketMsg, error) {
 	var evt nostr.Event
 	if err := json.Unmarshal(eventJSON, &evt); err != nil {
 		return nostr.Event{}, pkg.WebSocketMsg{}, nil
@@ -82,7 +84,7 @@ func (c relayUsecase) verify(eventJSON json.RawMessage) (nostr.Event, pkg.WebSoc
 	return evt, pkg.WebSocketMsg{}, nil
 }
 
-func (c relayUsecase) handleRequestMessage(ctx context.Context, requestData []json.RawMessage, s *melody.Session) (pkg.WebSocketMsg, error) {
+func (c *relayUsecase) handleRequestMessage(ctx context.Context, requestData []json.RawMessage, s *melody.Session) (pkg.WebSocketMsg, error) {
 	var id string
 	if err := json.Unmarshal(requestData[0], &id); err != nil {
 		return pkg.WebSocketMsg{}, fmt.Errorf("error: parse id")
@@ -91,11 +93,28 @@ func (c relayUsecase) handleRequestMessage(ctx context.Context, requestData []js
 	return pkg.WebSocketMsg{}, nil
 }
 
-func (c relayUsecase) handleCloseMessage(ctx context.Context, subscriptionID json.RawMessage) (pkg.WebSocketMsg, error) {
+func (c *relayUsecase) handleCloseMessage(ctx context.Context, subscriptionID json.RawMessage) (pkg.WebSocketMsg, error) {
 	var id string
 	if err := json.Unmarshal(subscriptionID, &id); err != nil {
 		return pkg.WebSocketMsg{}, fmt.Errorf("error: parse id")
 	}
 	c.notification.UnSubscribe(ctx, id)
 	return pkg.WebSocketMsg{}, nil
+}
+
+func (c *relayUsecase) SendMessageToSubscriber(ctx context.Context) error {
+	events, err := c.eStore.SearchByContent(ctx, "")
+	if err != nil {
+		logrus.Warn(err)
+		return err
+	}
+	num, err := rand.Int(rand.Reader, big.NewInt(int64(len(events))))
+	if err != nil {
+		logrus.Warn(err)
+		return err
+	}
+	event := pkg.EventToNostrEvent(events[num.Int64()])
+	message := []interface{}{"EVENT", event.ID, event}
+	c.notification.Broadcast(ctx, message)
+	return nil
 }

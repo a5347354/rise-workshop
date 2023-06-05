@@ -5,3 +5,4 @@ rise-workshop
 cmd/relay/relay
 cmd/client/client
 cmd/aggregator/aggregator
+pubsub.json

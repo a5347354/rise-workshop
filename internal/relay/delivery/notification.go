@@ -2,11 +2,12 @@ package delivery
 
 import (
 	"github.com/a5347354/rise-workshop/internal/relay"
-	"github.com/sirupsen/logrus"
 
 	"context"
+	"encoding/json"
 	"sync"
 
+	"github.com/sirupsen/logrus"
 	"gopkg.in/olahol/melody.v1"
 )
 
@@ -32,11 +33,18 @@ func (n *Notification) UnSubscribe(ctx context.Context, id string) {
 	delete(n.sessions, id)
 }
 
-func (n *Notification) Broadcast(ctx context.Context, msg []byte) {
+func (n *Notification) Broadcast(ctx context.Context, msg []interface{}) {
 	n.RLock()
 	defer n.RUnlock()
-	for _, session := range n.sessions {
-		err := n.m.BroadcastOthers(msg, session)
-		logrus.Warn(err)
+	for id := range n.sessions {
+		msg[1] = id
+		b, err := json.Marshal(msg)
+		if err != nil {
+			logrus.Warn(err)
+		}
+		err = n.m.Broadcast(b)
+		if err != nil {
+			logrus.Warn(err)
+		}
 	}
 }
