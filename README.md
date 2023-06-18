@@ -1,5 +1,7 @@
 # Distributed Systems Project 
+This project is a small side project that I undertake during my free time and after work. It involves learning and building a simple project from scratch, which is solely executed by me. The main objective is to create a playground where I can experiment with building distributed systems using tools and technologies of my choice.
 
+Throughout this course, I will be developing a Peer-to-Peer distributed system using the nostr protocol, while applying the principles and theory that I have learned in class. The project has a duration of six weeks and is divided into five phases that align with the course materials. As part of my weekly assignments, I will provide a brief written summary to track the progress of my project. Upon completing the necessary features, the project will be considered as finished.
 ## How to run this Project on local
 ### Install tools
 ```bash
@@ -97,4 +99,11 @@ When the failure rates are increasing, the success count becomes zero or the ave
 I will try using GCP solutions, such as Cloud Mertics, because it seems very convenient to have everything on the same GUI.
 
 ## Demo
-![img.png](img.png)
+### Grafana
+![grafana_demo.png](assets/images/grafana_demo.png)
+
+### Testing Relay Component with 500 Virtual Users for a 10-Second Duration
+The report indicates that out of 500 Virtual Users (VUs), there were 82 interrupted iterations, suggesting that the relay component was unable to handle additional connections. Additionally, both the median iteration duration and WebSocket (ws) connection time appear to be relatively slow, which could further contribute to the performance issues. 
+![k6_loadtest_report.png](assets/images/k6_loadtest_report.png)
+And by utilizing the cloud trace tool, we were able to identify the intentional bottleneck introduced in this project. This enables us to easily locate the issue when there is an increase in data load.
+![cloud_trace_relay.png](assets/images/cloud_trace_relay.png)

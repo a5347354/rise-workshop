@@ -17,7 +17,7 @@ export default function () {
             socket.send(req)
             socket.setInterval(function timeout() {
                 socket.ping();
-                console.log('Pinging every 1sec (setInterval test)');
+                // console.log('Pinging every 1sec (setInterval test)');
             }, 1000);
         });
 
