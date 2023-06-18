@@ -101,9 +101,10 @@ I will try using GCP solutions, such as Cloud Mertics, because it seems very con
 ## Demo
 ### Grafana
 ![grafana_demo.png](assets/images/grafana_demo.png)
-
 ### Testing Relay Component with 500 Virtual Users for a 10-Second Duration
 The report indicates that out of 500 Virtual Users (VUs), there were 82 interrupted iterations, suggesting that the relay component was unable to handle additional connections. Additionally, both the median iteration duration and WebSocket (ws) connection time appear to be relatively slow, which could further contribute to the performance issues. 
+
+[Load Test script](scripts/loadtest/k6/relay.js)
 ![k6_loadtest_report.png](assets/images/k6_loadtest_report.png)
 And by utilizing the cloud trace tool, we were able to identify the intentional bottleneck introduced in this project. This enables us to easily locate the issue when there is an increase in data load.
 ![cloud_trace_relay.png](assets/images/cloud_trace_relay.png)

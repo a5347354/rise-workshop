@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 4,
+  "id": 1,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -106,7 +106,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(rate(success_total{job=\"aggregator\"}[1m])) by (client)",
+          "expr": "sum(rate(success_total{job=\"aggregator\"}[$__range])) by (client)",
           "legendFormat": "aggregator",
           "range": true,
           "refId": "A"
@@ -117,7 +117,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(rate(success_total{job=\"aggregator-consumer\"}[1m]))",
+          "expr": "sum(rate(success_total{job=\"aggregator-consumer\"}[$__range]))",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -130,7 +130,11 @@
             "type": "prometheus",
             "uid": "PBFA97CFB590B2093"
           },
+          "editorMode": "code",
+          "expr": "sum(rate(success_total{job=\"relay\"}[$__range])) by (broadcast)",
           "hide": false,
+          "legendFormat": "relay",
+          "range": true,
           "refId": "C"
         }
       ],
@@ -198,7 +202,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -263,7 +267,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -330,7 +334,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -408,7 +412,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -473,7 +477,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -540,7 +544,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -618,7 +622,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -683,7 +687,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -750,7 +754,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.2",
+      "pluginVersion": "9.5.3",
       "targets": [
         {
           "datasource": {
@@ -783,6 +787,6 @@
   "timezone": "",
   "title": "DISTRISE",
   "uid": "a0d3e238-0dd1-44f5-a707-6e2b6973eafe",
-  "version": 18,
+  "version": 4,
   "weekStart": ""
 }
